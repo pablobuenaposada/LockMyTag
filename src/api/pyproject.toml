@@ -17,4 +17,9 @@ tests = [
     "ipdb>=0.13.13",
     "pytest>=8.4.1",
     "pytest-django>=4.11.1",
+    "ruff>=0.12.10",
 ]
+
+[tool.ruff]
+lint.extend-select = ["I"]
+exclude = ["migrations"]

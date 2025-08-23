@@ -1,8 +1,9 @@
+from unittest.mock import ANY
+
 import pytest
+from faker import Faker
 
 from locations.models import Tag
-from faker import Faker
-from unittest.mock import ANY
 
 
 @pytest.mark.django_db
@@ -16,13 +17,13 @@ class TestTag:
             "skn": fake.bothify("?" * 44),
             "paired_at": "2025-07-23",
             "created": ANY,
-            "modified": ANY
+            "modified": ANY,
         }
         tag = Tag.objects.create(
             name=expected["name"],
             master_key=expected["master_key"],
             skn=expected["skn"],
-            paired_at=expected["paired_at"]
+            paired_at=expected["paired_at"],
         )
 
         for field in [
