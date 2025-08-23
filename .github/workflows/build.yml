@@ -14,6 +14,9 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           args: "format --check"
+      - name: Forgotten migrations
+        run: |
+          make docker/migrations-check
       - name: Unit tests
         run: |
           make docker/tests

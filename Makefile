@@ -9,6 +9,10 @@ local/format:
 	uv --directory src/api run ruff format
 	uv --directory src/api run ruff check --fix
 
+docker/migrations-check:
+	docker compose up -d --force-recreate db django
+	docker exec lockmytag-django-1 uv run python manage.py makemigrations --check --dry-run
+
 docker/tests:
-	 docker compose up -d --force-recreate db django
-	 docker exec lockmytag-django-1 uv run --group tests pytest tests
+	docker compose up -d --force-recreate db django
+	docker exec lockmytag-django-1 uv run --group tests pytest tests
