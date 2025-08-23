@@ -12,6 +12,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  django:
+    build: ./src/api/.
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - src/api/.env.tests
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:
