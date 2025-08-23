@@ -6,7 +6,7 @@ on:
     branches: [ master ]
 
 jobs:
-  format:
+  code-format:
     name: Run code formatting checks
     runs-on: ubuntu-latest
     steps:
@@ -14,9 +14,39 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           args: "format --check"
-      - name: Forgotten migrations
-        run: |
+
+  docker-compose-format:
+    name: Run docker compose linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: addnab/docker-run-action@v3
+        with:
+          image: zavoloklom/dclint:alpine
+          options: -v ${{ github.workspace }}:/mnt
+          run: /bin/dclint /mnt -c /mnt/.dclintrc --max-warnings 0 -r
+
+  dockerfile-format:
+    name: Run dockerfile linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: src/api/Dockerfile
+
+  migrations:
+    name: Forgotten migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
           make docker/migrations-check
-      - name: Unit tests
-        run: |
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
           make docker/tests

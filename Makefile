@@ -8,6 +8,7 @@ local/tests:
 local/format:
 	uv --directory src/api run ruff format
 	uv --directory src/api run ruff check --fix
+	npx dclint . -r --fix
 
 docker/migrations-check:
 	docker compose up -d --force-recreate db django
