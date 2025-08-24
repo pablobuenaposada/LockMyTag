@@ -22,6 +22,13 @@ services:
     ports:
       - "8000:8000"
     command: python manage.py runserver 0.0.0.0:8000
+  migration:
+    build: ./src/api/.
+    depends_on:
+      - django
+    env_file:
+      - src/api/.env.tests
+    command: python manage.py migrate
 
 volumes:
   postgres_data:
