@@ -1,6 +1,8 @@
 from unittest.mock import ANY
 
 import pytest
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from faker import Faker
 
 from locations.models import Tag
@@ -32,3 +34,25 @@ class TestTag:
             if field.name not in ["taglocation"]
         ]:
             assert getattr(tag, field) == expected[field]
+
+    @pytest.mark.parametrize(
+        "fields, error",
+        [
+            ({"name": "foo", "master_key": "0" * 28, "skn": "0" * 44}, IntegrityError),
+            (
+                {"name": "foo", "master_key": "0" * 28, "paired_at": "2025-07-23"},
+                ValidationError,
+            ),
+            (
+                {"name": "foo", "skn": "0" * 44, "paired_at": "2025-07-23"},
+                ValidationError,
+            ),
+            (
+                {"master_key": "0" * 28, "skn": "0" * 44, "paired_at": "2025-07-23"},
+                ValidationError,
+            ),
+        ],
+    )
+    def test_mandatory_fields(self, fields, error):
+        with pytest.raises(error):
+            Tag.objects.create(**fields)
