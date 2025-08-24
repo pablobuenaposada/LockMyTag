@@ -17,6 +17,7 @@ dependencies = [
 tests = [
     { name = "faker" },
     { name = "ipdb" },
+    { name = "model-bakery" },
     { name = "pytest" },
     { name = "pytest-django" },
     { name = "ruff" },
@@ -34,6 +35,7 @@ requires-dist = [
 tests = [
     { name = "faker", specifier = ">=37.5.3" },
     { name = "ipdb", specifier = ">=0.13.13" },
+    { name = "model-bakery", specifier = ">=1.20.5" },
     { name = "pytest", specifier = ">=8.4.1" },
     { name = "pytest-django", specifier = ">=4.11.1" },
     { name = "ruff", specifier = ">=0.12.10" },
@@ -208,6 +210,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/99/5b/a36a337438a14116b16480db471ad061c36c3694df7c2084a0da7ba538b7/matplotlib_inline-0.1.7.tar.gz", hash = "sha256:8423b23ec666be3d16e16b60bdd8ac4e86e840ebd1dd11a30b9f117f2fa0ab90", size = 8159, upload-time = "2024-04-15T13:44:44.803Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8f/8e/9ad090d3553c280a8060fbf6e24dc1c0c29704ee7d1c372f0c174aa59285/matplotlib_inline-0.1.7-py3-none-any.whl", hash = "sha256:df192d39a4ff8f21b1895d72e6a13f5fcc5099f00fa84384e0ea28c2cc0653ca", size = 9899, upload-time = "2024-04-15T13:44:43.265Z" },
+]
+
+[[package]]
+name = "model-bakery"
+version = "1.20.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bf/73/24854c5053c852201b4799e7837060496d1418a28488a90a299e8d9c618b/model_bakery-1.20.5.tar.gz", hash = "sha256:107b3efb8889baac83cae0e2d81465903b69a70eeb99ecfd0929d959a653ab90", size = 21332, upload-time = "2025-06-07T10:21:47.727Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/13/4b/157c1113e317f79a257b4dfe0607dbab7f57bec67a34d053588dfb8945ac/model_bakery-1.20.5-py3-none-any.whl", hash = "sha256:796e0b7fa6bf2acc09feaadce40c6bcc13e5b55c5bdff9f76e87ceb64f736070", size = 24292, upload-time = "2025-06-07T10:21:46.438Z" },
 ]
 
 [[package]]

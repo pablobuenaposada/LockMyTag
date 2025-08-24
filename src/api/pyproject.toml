@@ -15,6 +15,7 @@ dependencies = [
 tests = [
     "faker>=37.5.3",
     "ipdb>=0.13.13",
+    "model-bakery>=1.20.5",
     "pytest>=8.4.1",
     "pytest-django>=4.11.1",
     "ruff>=0.12.10",
