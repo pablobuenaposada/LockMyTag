@@ -1,1 +1,18 @@
-# Register your models here.
+from django.contrib import admin
+
+from .models import Tag, TagLocation
+
+
+class TagAdmin(admin.ModelAdmin):
+    exclude = ("id",)
+    readonly_fields = ("created", "modified")
+    list_display = ("id", "name")
+
+
+class TagLocationAdmin(admin.ModelAdmin):
+    readonly_fields = ("created", "modified")
+    list_display = ("id", "tag__name", "latitude", "longitude", "created")
+
+
+admin.site.register(Tag, TagAdmin)
+admin.site.register(TagLocation, TagLocationAdmin)

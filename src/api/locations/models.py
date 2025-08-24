@@ -1,3 +1,5 @@
+import uuid
+
 from django.core.validators import MinLengthValidator
 from django.db import models
 from django_extensions.db.models import TimeStampedModel
@@ -6,7 +8,9 @@ from locations.validators import validate_empty
 
 
 class Tag(TimeStampedModel):
-    id = models.CharField(max_length=255, unique=True, primary_key=True)
+    id = models.UUIDField(
+        default=uuid.uuid4, editable=False, unique=True, primary_key=True
+    )
     name = models.CharField(max_length=255, help_text="Name for the AirTag")
     master_key = models.CharField(max_length=28, validators=[MinLengthValidator(28)])
     skn = models.CharField(max_length=44, validators=[MinLengthValidator(44)])

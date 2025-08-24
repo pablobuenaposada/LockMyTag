@@ -22,4 +22,4 @@ docker/create-super-user:
 	docker exec lockmytag-django-1 uv run python manage.py createsuperuser --noinput
 
 docker/up:
-	docker compose up -d --force-recreate
+	docker compose up -d --force-recreate --build
