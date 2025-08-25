@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:14.4-alpine
+    image: postgres:17.6-alpine
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     env_file:
@@ -22,7 +22,7 @@ services:
     ports:
       - "8000:8000"
     command: python manage.py runserver 0.0.0.0:8000
-  migration:
+  migrations:
     build: ./src/api/.
     depends_on:
       - django
