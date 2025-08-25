@@ -14,8 +14,8 @@ class TestsTagLocationInputSerializer:
     @pytest.fixture(autouse=True)
     def setup_class(self):
         fake = Faker()
-        self.latitude = fake.latitude()
-        self.longitude = fake.longitude()
+        self.latitude = round(fake.latitude(), 6)
+        self.longitude = round(fake.longitude(), 6)
         self.tag = baker.make(Tag)
 
     def test_mandatory(self):

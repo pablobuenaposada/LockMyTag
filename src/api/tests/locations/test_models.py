@@ -62,8 +62,8 @@ class TestTag:
 @pytest.mark.django_db
 class TestTagLocation:
     fake = Faker()
-    latitude = fake.latitude()
-    longitude = fake.longitude()
+    latitude = round(fake.latitude(), 6)
+    longitude = round(fake.longitude(), 6)
 
     def test_success(self):
         tag = baker.make(Tag)
