@@ -1,0 +1,17 @@
+[project]
+name = "fetcher"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "findmy",
+]
+
+[tool.uv.sources]
+findmy = { git = "https://github.com/malmeloo/FindMy.py.git", rev = "main" }
+
+[dependency-groups]
+tests = [
+    "ruff>=0.12.10",
+]

@@ -8,6 +8,8 @@ local/tests:
 local/format:
 	uv --directory src/api run ruff format
 	uv --directory src/api run ruff check --fix
+	uv --directory src/fetcher run ruff format
+	uv --directory src/fetcher run ruff check --fix
 	npx dclint . -r --fix
 
 docker/migrations-check:
