@@ -29,6 +29,14 @@ services:
     env_file:
       - src/api/.env.tests
     command: python manage.py migrate
+  fetcher:
+    build: ./src/fetcher/.
+    depends_on:
+      - django
+    volumes:
+      - ./src/fetcher/account.json:/app/account.json
+    env_file:
+      - src/fetcher/.env.tests
 
 volumes:
   postgres_data:

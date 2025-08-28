@@ -12,7 +12,7 @@ class Tag(TimeStampedModel):
         default=uuid.uuid4, editable=False, unique=True, primary_key=True
     )
     name = models.CharField(max_length=255, help_text="Name for the AirTag")
-    master_key = models.CharField(max_length=28, validators=[MinLengthValidator(28)])
+    master_key = models.CharField(max_length=116, validators=[MinLengthValidator(116)])
     skn = models.CharField(max_length=44, validators=[MinLengthValidator(44)])
     paired_at = models.DateField()
 

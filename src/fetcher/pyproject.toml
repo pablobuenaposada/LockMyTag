@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "findmy",
+    "requests>=2.32.5",
 ]
 
 [tool.uv.sources]
@@ -15,3 +16,6 @@ findmy = { git = "https://github.com/malmeloo/FindMy.py.git", rev = "main" }
 tests = [
     "ruff>=0.12.10",
 ]
+
+[tool.ruff]
+lint.extend-select = ["I"]
