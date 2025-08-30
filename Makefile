@@ -6,10 +6,10 @@ local/tests:
 	PYTHONPATH=src uv --directory src/api run --env-file .env.tests --group tests pytest tests -s
 
 local/format:
-	uv --directory src/api run ruff format
-	uv --directory src/api run ruff check --fix
-	uv --directory src/fetcher run ruff format
-	uv --directory src/fetcher run ruff check --fix
+	uv --directory src/api run --group tests ruff format
+	uv --directory src/api run --group tests ruff check --fix
+	uv --directory src/fetcher run --group tests ruff format
+	uv --directory src/fetcher run --group tests ruff check --fix
 	npx dclint . -r --fix
 
 docker/migrations-check:

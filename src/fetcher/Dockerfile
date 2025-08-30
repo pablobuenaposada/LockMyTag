@@ -3,7 +3,7 @@ FROM python:3.13-slim
 WORKDIR /app
 
 COPY apple /app/apple
-COPY main.py pyproject.toml uv.lock /app/
+COPY main.py constants.py pyproject.toml uv.lock /app/
 
 RUN apt-get update && apt-get install -y git
 ENV UV_PROJECT_ENVIRONMENT="/usr/local/"

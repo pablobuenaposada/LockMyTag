@@ -1,3 +1,5 @@
+import base64
+
 import pytest
 from django.shortcuts import resolve_url
 from faker import Faker
@@ -15,8 +17,10 @@ class TestsTagLocationCreateView:
     @pytest.fixture(autouse=True)
     def setup_class(self):
         fake = Faker()
-        self.latitude = round(fake.latitude(), 6)
-        self.longitude = round(fake.longitude(), 6)
+        self.latitude = round(fake.latitude(), 7)
+        self.longitude = round(fake.longitude(), 7)
+        self.hash = base64.b64encode(fake.binary(length=33)).decode("utf-8")
+        self.timestamp = fake.date_time()
         self.tag = baker.make(Tag)
 
     def test_url(self):
@@ -28,8 +32,10 @@ class TestsTagLocationCreateView:
             self.endpoint,
             {
                 "tag": str(self.tag.id),
+                "hash": self.hash,
                 "latitude": self.latitude,
                 "longitude": self.longitude,
+                "timestamp": self.timestamp,
             },
         )
 

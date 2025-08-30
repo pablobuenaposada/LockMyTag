@@ -1,26 +1,25 @@
 import base64
 import datetime
 import logging
-import os
 import time
 
 import requests
 from findmy import FindMyAccessory
 
 from apple.account import login
+from constants import LOCATIONS_ENDPOINT, SLEEP_SECONDS, TAGS_ENDPOINT
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
 )
-SLEEP_SECONDS = int(os.environ.get("SLEEP_SECONDS"))
 
 logger = logging.getLogger(__name__)
 account = login()
-response = requests.get(f"{os.environ.get('API_URL')}/api/tags/")
-response.raise_for_status()
+tags = requests.get(TAGS_ENDPOINT)
+tags.raise_for_status()
 
 while True:
-    for tag in response.json():
+    for tag in tags.json():
         accessory = FindMyAccessory(
             master_key=base64.b64decode(tag["master_key"])[-28:],
             skn=base64.b64decode(tag["skn"]),
@@ -33,7 +32,31 @@ while True:
         logger.info(f"{tag['name']} airtag found")
 
         reports = account.fetch_last_reports(accessory)
-        for report in sorted(reports):
-            print(f" - {report}")
+        unique_reports = {r.hashed_adv_key_b64: r for r in reports}
 
-        time.sleep(SLEEP_SECONDS)
+        for report in unique_reports.values():
+            response = requests.post(
+                LOCATIONS_ENDPOINT,
+                json={
+                    "tag": tag["id"],
+                    "hash": report.hashed_adv_key_b64,
+                    "latitude": report.latitude,
+                    "longitude": report.longitude,
+                    "timestamp": report.timestamp.isoformat(),
+                },
+            )
+
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError:
+                if (
+                    response.content
+                    == b'{"hash":["tag location with this hash already exists."]}'
+                ):
+                    pass
+                else:
+                    raise
+
+            logger.info(f"Location report: {report.hashed_adv_key_b64} sent to api")
+
+    time.sleep(SLEEP_SECONDS)
