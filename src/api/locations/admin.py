@@ -11,7 +11,7 @@ class TagAdmin(admin.ModelAdmin):
 
 class TagLocationAdmin(admin.ModelAdmin):
     readonly_fields = ("created", "modified")
-    list_display = ("id", "tag__name", "latitude", "longitude", "timestamp")
+    list_display = ("hash", "tag__name", "latitude", "longitude", "timestamp")
 
 
 admin.site.register(Tag, TagAdmin)

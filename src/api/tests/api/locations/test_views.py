@@ -1,4 +1,3 @@
-import base64
 
 import pytest
 from django.shortcuts import resolve_url
@@ -19,7 +18,7 @@ class TestsTagLocationCreateView:
         fake = Faker()
         self.latitude = round(fake.latitude(), 7)
         self.longitude = round(fake.longitude(), 7)
-        self.hash = base64.b64encode(fake.binary(length=33)).decode("utf-8")
+        self.hash = fake.random_int()
         self.timestamp = fake.date_time()
         self.tag = baker.make(Tag)
 

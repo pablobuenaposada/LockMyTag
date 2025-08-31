@@ -32,14 +32,14 @@ while True:
         logger.info(f"{tag['name']} airtag found")
 
         reports = account.fetch_last_reports(accessory)
-        unique_reports = {r.hashed_adv_key_b64: r for r in reports}
+        unique_reports = {r.__hash__(): r for r in reports}
 
         for report in unique_reports.values():
             response = requests.post(
                 LOCATIONS_ENDPOINT,
                 json={
                     "tag": tag["id"],
-                    "hash": report.hashed_adv_key_b64,
+                    "hash": report.__hash__(),
                     "latitude": report.latitude,
                     "longitude": report.longitude,
                     "timestamp": report.timestamp.isoformat(),

@@ -1,4 +1,3 @@
-import base64
 from unittest.mock import ANY
 
 import pytest
@@ -85,7 +84,7 @@ class TestTagLocation:
     fake = Faker()
     latitude = round(fake.latitude(), 6)
     longitude = round(fake.longitude(), 6)
-    hash = base64.b64encode(fake.binary(length=33)).decode("utf-8")
+    hash = fake.random_int()
     timestamp = fake.date_time()
 
     def test_success(self):
@@ -97,14 +96,14 @@ class TestTagLocation:
             "tag": tag,
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "hash": ANY,
+            "hash": self.hash,
             "timestamp": ANY,
         }
         tag_location = TagLocation.objects.create(
             tag=tag,
             latitude=self.latitude,
             longitude=self.longitude,
-            hash=hash,
+            hash=self.hash,
             timestamp=self.timestamp,
         )
 
@@ -114,15 +113,15 @@ class TestTagLocation:
     @pytest.mark.parametrize(
         "fields, error",
         [
-            ({}, ValidationError),
-            ({"hash": "abc"}, IntegrityError),
-            ({"hash": "abc", "latitude": 1}, IntegrityError),
-            ({"hash": "abc", "latitude": 1, "longitude": 1}, IntegrityError),
+            ({}, IntegrityError),
+            ({"hash": "123"}, IntegrityError),
+            ({"hash": "123", "latitude": 1}, IntegrityError),
+            ({"hash": "123", "latitude": 1, "longitude": 1}, IntegrityError),
             (
                 {
                     "timestamp": "2023-09-13",
                 },
-                ValidationError,
+                IntegrityError,
             ),
         ],
     )

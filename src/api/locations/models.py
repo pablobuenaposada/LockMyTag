@@ -27,15 +27,7 @@ class Tag(TimeStampedModel):
 
 class TagLocation(TimeStampedModel):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    hash = models.CharField(
-        max_length=44,
-        unique=True,
-        help_text="Base64-encoded hash of the location report",
-    )
+    hash = models.BigIntegerField(unique=True)
     latitude = models.DecimalField(max_digits=10, decimal_places=7)
     longitude = models.DecimalField(max_digits=10, decimal_places=7)
     timestamp = models.DateTimeField(help_text="Timestamp of the location report")
-
-    def save(self, **kwargs):
-        validate_empty(self.hash)
-        super().save(**kwargs)
