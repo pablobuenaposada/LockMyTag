@@ -27,7 +27,9 @@ class Tag(TimeStampedModel):
 
 class TagLocation(TimeStampedModel):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    hash = models.BigIntegerField(unique=True)
     latitude = models.DecimalField(max_digits=10, decimal_places=7)
     longitude = models.DecimalField(max_digits=10, decimal_places=7)
-    timestamp = models.DateTimeField(help_text="Timestamp of the location report")
+    timestamp = models.DateTimeField()
+
+    class Meta:
+        unique_together = (("tag", "latitude", "longitude", "timestamp"),)

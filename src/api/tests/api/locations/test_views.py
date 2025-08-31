@@ -1,4 +1,3 @@
-
 import pytest
 from django.shortcuts import resolve_url
 from faker import Faker

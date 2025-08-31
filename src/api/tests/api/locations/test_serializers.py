@@ -18,7 +18,6 @@ class TestsTagLocationInputSerializer:
         fake = Faker()
         self.latitude = round(fake.latitude(), 7)
         self.longitude = round(fake.longitude(), 7)
-        self.hash = fake.random_int()
         self.timestamp = fake.date_time()
         self.tag = baker.make(Tag)
 
@@ -28,7 +27,6 @@ class TestsTagLocationInputSerializer:
         assert not serializer.is_valid()
         assert serializer.errors == {
             "tag": [ErrorDetail(string="This field is required.", code="required")],
-            "hash": [ErrorDetail(string="This field is required.", code="required")],
             "latitude": [
                 ErrorDetail(string="This field is required.", code="required")
             ],
@@ -44,7 +42,6 @@ class TestsTagLocationInputSerializer:
         serializer = self.serializer_class(
             data={
                 "tag": str(self.tag.id),
-                "hash": self.hash,
                 "latitude": self.latitude,
                 "longitude": self.longitude,
                 "timestamp": self.timestamp,
@@ -54,7 +51,6 @@ class TestsTagLocationInputSerializer:
         assert serializer.is_valid()
         assert serializer.validated_data == {
             "tag": self.tag,
-            "hash": self.hash,
             "latitude": self.latitude,
             "longitude": self.longitude,
             "timestamp": self.timestamp.replace(tzinfo=timezone.utc),
