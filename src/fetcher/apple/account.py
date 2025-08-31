@@ -7,11 +7,12 @@ from findmy.reports import (
 from findmy.reports.anisette import LocalAnisetteProvider
 
 STORE_PATH = "account.json"
+ANI_LIB_PATH = "ani_libs.bin"
 
 
-def login():
+def login(account_json):
     try:
-        account = AppleAccount.from_json(STORE_PATH)
+        account = AppleAccount.from_json(account_json, anisette_libs_path=ANI_LIB_PATH)
     except FileNotFoundError:
         account = AppleAccount(LocalAnisetteProvider())
         email = input("email?  > ")

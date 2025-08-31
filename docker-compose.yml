@@ -35,12 +35,9 @@ services:
     command: python manage.py migrate
   fetcher:
     build: ./src/fetcher/.
-    depends_on:
-      - django
-    volumes:
-      - ./src/fetcher/account.json:/app/account.json
     env_file:
       - src/fetcher/.env.tests
+    restart: unless-stopped
 
 volumes:
   postgres_data:

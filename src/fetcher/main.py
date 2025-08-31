@@ -8,14 +8,16 @@ from colorama import Fore
 from findmy import FindMyAccessory
 
 from apple.account import login
-from constants import LOCATIONS_ENDPOINT, SLEEP_SECONDS, TAGS_ENDPOINT
+from constants import ACCOUNT_ENDPOINT, LOCATIONS_ENDPOINT, SLEEP_SECONDS, TAGS_ENDPOINT
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
 )
 
 logger = logging.getLogger(__name__)
-account = login()
+account = requests.get(ACCOUNT_ENDPOINT)
+account.raise_for_status()
+account = login(account.json()[0]["data"])
 tags = requests.get(TAGS_ENDPOINT)
 tags.raise_for_status()
 tags = tags.json()
