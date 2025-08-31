@@ -31,5 +31,9 @@ class TagLocation(TimeStampedModel):
     longitude = models.DecimalField(max_digits=10, decimal_places=7)
     timestamp = models.DateTimeField()
 
+    @property
+    def google_maps_url(self):
+        return f"https://www.google.com/maps?q={self.latitude},{self.longitude}"
+
     class Meta:
         unique_together = (("tag", "latitude", "longitude", "timestamp"),)
