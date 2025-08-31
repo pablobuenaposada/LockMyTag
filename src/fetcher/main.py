@@ -23,7 +23,7 @@ while True:
         accessory = FindMyAccessory(
             master_key=base64.b64decode(tag["master_key"])[-28:],
             skn=base64.b64decode(tag["skn"]),
-            sks=bytes(32),
+            sks=base64.b64decode(tag["sks"]),
             paired_at=datetime.datetime.strptime(tag["paired_at"], "%Y-%m-%d"),
             name=None,
             model=None,

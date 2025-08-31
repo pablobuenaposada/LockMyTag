@@ -17,6 +17,7 @@ class TestsTagOutputSerializer:
             "name": tag.name,
             "master_key": tag.master_key,
             "skn": tag.skn,
+            "sks": tag.sks,
             "paired_at": tag.paired_at.isoformat(),
             "created": tag.created.isoformat().replace("+00:00", "Z"),
             "modified": tag.modified.isoformat().replace("+00:00", "Z"),

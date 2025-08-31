@@ -19,6 +19,7 @@ class TestTag:
             "name": "Test Tag",
             "master_key": fake.bothify("?" * 28),
             "skn": fake.bothify("?" * 44),
+            "sks": fake.bothify("?" * 44),
             "paired_at": "2025-07-23",
             "created": ANY,
             "modified": ANY,
@@ -27,6 +28,7 @@ class TestTag:
             name=expected["name"],
             master_key=expected["master_key"],
             skn=expected["skn"],
+            sks=expected["sks"],
             paired_at=expected["paired_at"],
         )
 
@@ -40,17 +42,35 @@ class TestTag:
     @pytest.mark.parametrize(
         "fields, error",
         [
-            ({"name": "foo", "master_key": "0" * 28, "skn": "0" * 44}, IntegrityError),
+            (
+                {
+                    "name": "foo",
+                    "master_key": "0" * 28,
+                    "skn": "0" * 44,
+                    "sks": "0" * 44,
+                },
+                IntegrityError,
+            ),
             (
                 {"name": "foo", "master_key": "0" * 28, "paired_at": "2025-07-23"},
                 ValidationError,
             ),
             (
-                {"name": "foo", "skn": "0" * 44, "paired_at": "2025-07-23"},
+                {
+                    "name": "foo",
+                    "skn": "0" * 44,
+                    "sks": "0" * 44,
+                    "paired_at": "2025-07-23",
+                },
                 ValidationError,
             ),
             (
-                {"master_key": "0" * 28, "skn": "0" * 44, "paired_at": "2025-07-23"},
+                {
+                    "master_key": "0" * 28,
+                    "skn": "0" * 44,
+                    "sks": "0" * 44,
+                    "paired_at": "2025-07-23",
+                },
                 ValidationError,
             ),
         ],

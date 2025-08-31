@@ -14,11 +14,13 @@ class Tag(TimeStampedModel):
     name = models.CharField(max_length=255, help_text="Name for the AirTag")
     master_key = models.CharField(max_length=116, validators=[MinLengthValidator(116)])
     skn = models.CharField(max_length=44, validators=[MinLengthValidator(44)])
+    sks = models.CharField(max_length=44, validators=[MinLengthValidator(44)])
     paired_at = models.DateField()
 
     def save(self, **kwargs):
         validate_empty(self.master_key)
         validate_empty(self.skn)
+        validate_empty(self.sks)
         validate_empty(self.name)
         super().save(**kwargs)
 
