@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY api /app/api
 COPY locations /app/locations
+COPY account /app/account
 COPY main /app/main
 COPY tests /app/tests
 COPY .python-version manage.py pyproject.toml uv.lock /app/
