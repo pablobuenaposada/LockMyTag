@@ -11,8 +11,9 @@ services:
     image: postgres:17.6-alpine
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-    env_file:
-      - src/api/.env.tests
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -23,20 +24,33 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    env_file:
-      - src/api/.env.tests
+    environment:
+      DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
     command: python manage.py runserver 0.0.0.0:8000
   migrations:
     build: ./src/api/.
     depends_on:
       - django
-    env_file:
-      - src/api/.env.tests
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
     command: python manage.py migrate
   fetcher:
     build: ./src/fetcher/.
-    env_file:
-      - src/fetcher/.env.tests
+    environment:
+      API_URL: ${API_URL}
+      SLEEP_SECONDS: ${SLEEP_SECONDS}
     restart: unless-stopped
 
 volumes:
