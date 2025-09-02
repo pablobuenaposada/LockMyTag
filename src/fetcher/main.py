@@ -17,10 +17,17 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 account = requests.get(ACCOUNT_ENDPOINT)
 account.raise_for_status()
+if not account.json():
+    logger.error(f"{Fore.RED}No apple account found, exiting...{Fore.RESET}")
+    exit(1)
 account = login(account.json()[0]["data"])
+
 tags = requests.get(TAGS_ENDPOINT)
 tags.raise_for_status()
 tags = tags.json()
+if not tags:
+    logger.error(f"{Fore.RED}No tags found, exiting...{Fore.RESET}")
+    exit(1)
 
 logger.info(
     f"{Fore.GREEN}Found {len(tags)} tag(s): {', '.join(tag['name'] for tag in tags)}{Fore.RESET}"
