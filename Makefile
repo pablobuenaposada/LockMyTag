@@ -19,7 +19,7 @@ docker/migrations-check:
 
 docker/tests:
 	docker compose --env-file .env.local up -d --force-recreate db django
-	docker exec lockmytag-django-1 uv run --group tests pytest tests
+	docker exec lockmytag-django-1 env DJANGO_SETTINGS_MODULE=main.settings uv run --group tests pytest tests
 
 docker/create-super-user:
 	docker exec lockmytag-django-1 uv run python manage.py createsuperuser --noinput
