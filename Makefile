@@ -22,7 +22,7 @@ docker/tests:
 	docker exec lockmytag-django-1 uv run --group tests pytest tests
 
 docker/create-super-user:
-	docker exec lockmytag-django-1 uv run python manage.py createsuperuser --noinput
+	docker exec lockmytag-django-1 env DJANGO_SUPERUSER_PASSWORD=admin uv run python manage.py createsuperuser --username admin --email foo@bar.com --noinput
 
 docker/up:
 	docker compose --env-file .env.local up -d --force-recreate --build
