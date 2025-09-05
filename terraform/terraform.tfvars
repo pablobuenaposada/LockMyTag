@@ -6,4 +6,4 @@ droplet_name = "LockMyTag"
 
 droplet_region = "fra1"
 
-image_size = "s-1vcpu-1gb"
+image_size = "s-1vcpu-512mb-10gb"

@@ -26,3 +26,6 @@ docker/create-super-user:
 
 docker/up:
 	docker compose --env-file .env.local up -d --force-recreate --build
+
+docker/up-prod:
+	docker compose --env-file .env.prod up -d --force-recreate --build
