@@ -215,5 +215,11 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# Terraform
+.terraform/
+*.tfstate
+.terraform.lock.hcl
+*.tfstate.backup
+
 # Project specifics
 postgres-data
