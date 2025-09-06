@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 
 import environ
+from django.conf.locale.en import formats as en_formats
 
 env = environ.Env(
     # set casting, default value
@@ -124,8 +125,11 @@ TIME_ZONE = env("TIME_ZONE", default="UTC")
 
 USE_I18N = True
 
+USE_L10N = False
+
 USE_TZ = True
 
+en_formats.DATETIME_FORMAT = "N j, Y, H:i:s"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
