@@ -8,32 +8,52 @@ from colorama import Fore
 from findmy import FindMyAccessory
 
 from apple.account import login
-from constants import ACCOUNT_ENDPOINT, LOCATIONS_ENDPOINT, SLEEP_SECONDS, TAGS_ENDPOINT
+from constants import (
+    ACCOUNT_ENDPOINT,
+    LOCATIONS_ENDPOINT,
+    SLEEP_SECONDS,
+    TAGS_ENDPOINT,
+    TAGS_REFRESH_SECONDS,
+)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
 )
 
 logger = logging.getLogger(__name__)
-account = requests.get(ACCOUNT_ENDPOINT)
-account.raise_for_status()
-if not account.json():
-    logger.error(f"{Fore.RED}No apple account found, exiting...{Fore.RESET}")
-    exit(1)
-account = login(account.json()[0]["data"])
 
-tags = requests.get(TAGS_ENDPOINT)
-tags.raise_for_status()
-tags = tags.json()
-if not tags:
-    logger.error(f"{Fore.RED}No tags found, exiting...{Fore.RESET}")
-    exit(1)
 
-logger.info(
-    f"{Fore.GREEN}Found {len(tags)} tag(s): {', '.join(tag['name'] for tag in tags)}{Fore.RESET}"
-)
+def fetch_account_and_login():
+    account_response = requests.get(ACCOUNT_ENDPOINT)
+    account_response.raise_for_status()
+    if not account_response.json():
+        logger.error(f"{Fore.RED}No apple account found, exiting...{Fore.RESET}")
+        exit(1)
+    return login(account_response.json()[0]["data"])
+
+
+def fetch_tags():
+    tags_response = requests.get(TAGS_ENDPOINT)
+    tags_response.raise_for_status()
+    tags = tags_response.json()
+    if not tags:
+        logger.error(f"{Fore.RED}No tags found, exiting...{Fore.RESET}")
+        return
+    logger.info(
+        f"{Fore.GREEN}Found {len(tags)} tag(s): {', '.join(tag['name'] for tag in tags)}{Fore.RESET}"
+    )
+    return tags
+
+
+account = fetch_account_and_login()
+last_tags_refresh = 0
 
 while True:
+    now = time.time()
+    if now - last_tags_refresh > TAGS_REFRESH_SECONDS:
+        tags = fetch_tags()
+        last_tags_refresh = now
+
     for tag in tags:
         accessory = FindMyAccessory(
             master_key=base64.b64decode(tag["master_key"])[-28:],
