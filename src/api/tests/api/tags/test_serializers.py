@@ -1,4 +1,5 @@
 import pytest
+from django.utils import timezone
 from model_bakery import baker
 
 from api.tags.serializers import TagOutputSerializer
@@ -19,6 +20,10 @@ class TestsTagOutputSerializer:
             "skn": tag.skn,
             "sks": tag.sks,
             "paired_at": tag.paired_at.isoformat(),
-            "created": tag.created.isoformat().replace("+00:00", "Z"),
-            "modified": tag.modified.isoformat().replace("+00:00", "Z"),
+            "created": tag.created.astimezone(
+                timezone.get_current_timezone()
+            ).isoformat(),
+            "modified": tag.modified.astimezone(
+                timezone.get_current_timezone()
+            ).isoformat(),
         }

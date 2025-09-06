@@ -1,4 +1,5 @@
 import pytest
+from django.utils import timezone
 from model_bakery import baker
 
 from account.models import Account
@@ -15,6 +16,10 @@ class TestsAccountOutputSerializer:
         assert self.serializer_class(account).data == {
             "id": account.id,
             "data": account.data,
-            "created": account.created.isoformat().replace("+00:00", "Z"),
-            "modified": account.modified.isoformat().replace("+00:00", "Z"),
+            "created": account.created.astimezone(
+                timezone.get_current_timezone()
+            ).isoformat(),
+            "modified": account.modified.astimezone(
+                timezone.get_current_timezone()
+            ).isoformat(),
         }

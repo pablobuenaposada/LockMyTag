@@ -1,6 +1,5 @@
-from datetime import timezone
-
 import pytest
+from django.utils import timezone
 from faker import Faker
 from model_bakery import baker
 from rest_framework.exceptions import ErrorDetail
@@ -53,5 +52,5 @@ class TestsTagLocationInputSerializer:
             "tag": self.tag,
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "timestamp": self.timestamp.replace(tzinfo=timezone.utc),
+            "timestamp": self.timestamp.replace(tzinfo=timezone.get_current_timezone()),
         }
