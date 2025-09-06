@@ -10,3 +10,6 @@ class Account(TimeStampedModel):
         if not self.pk and Account.objects.exists():
             raise ValidationError("Only one Account instance allowed")
         super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name_plural = "Account"
