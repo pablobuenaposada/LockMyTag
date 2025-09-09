@@ -34,7 +34,7 @@ class TestTag:
         for field in [
             field.name
             for field in Tag._meta.get_fields()
-            if field.name not in ["taglocation"]
+            if field.name not in ["taglocation", "lock"]
         ]:
             assert getattr(tag, field) == expected[field]
 
