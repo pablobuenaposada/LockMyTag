@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: src/api/Dockerfile
+          dockerfile: src/backoffice/Dockerfile
 
   migrations:
     name: Forgotten migrations

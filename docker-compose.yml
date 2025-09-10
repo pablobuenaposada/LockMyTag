@@ -21,7 +21,7 @@ services:
       timeout: 5s
       retries: 5
   django:
-    build: ./src/api/.
+    build: ./src/backoffice/.
     depends_on:
       migrations:
         condition: service_completed_successfully
@@ -39,7 +39,7 @@ services:
       - "127.0.0.1:8000:8000"
     command: gunicorn main.wsgi:application --bind 0.0.0.0:8000
   migrations:
-    build: ./src/api/.
+    build: ./src/backoffice/.
     depends_on:
       db:
         condition: service_healthy
@@ -52,7 +52,7 @@ services:
       SECRET_KEY: ${SECRET_KEY}
     command: python manage.py migrate
   collectstatic:
-    build: ./src/api/.
+    build: ./src/backoffice/.
     depends_on:
       migrations:
         condition: service_completed_successfully
