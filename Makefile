@@ -14,15 +14,15 @@ local/format:
 	npx dclint . -r --fix
 
 docker/migrations-check:
-	docker compose --env-file .env.local up -d --force-recreate db django
-	docker exec lockmytag-django-1 uv run python manage.py makemigrations --check --dry-run
+	docker compose --env-file .env.local up -d --force-recreate db backoffice
+	docker exec lockmytag-backoffice-1 uv run python manage.py makemigrations --check --dry-run
 
 docker/tests:
-	docker compose --env-file .env.local up -d --force-recreate db django
-	docker exec lockmytag-django-1 uv run --group tests pytest tests
+	docker compose --env-file .env.local up -d --force-recreate db backoffice
+	docker exec lockmytag-backoffice uv run --group tests pytest tests
 
 docker/create-super-user:
-	docker exec lockmytag-django-1 env DJANGO_SUPERUSER_PASSWORD=admin uv run python manage.py createsuperuser --username admin --email foo@bar.com --noinput
+	docker exec lockmytag-backoffice-1 env DJANGO_SUPERUSER_PASSWORD=admin uv run python manage.py createsuperuser --username admin --email foo@bar.com --noinput
 
 docker/up:
 	docker compose --env-file .env.local up -d --force-recreate --build

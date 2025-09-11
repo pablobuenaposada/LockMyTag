@@ -2,7 +2,7 @@ services:
   nginx:
     image: nginx:alpine
     depends_on:
-      - django
+      - backoffice
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       - static:/app/static
@@ -20,7 +20,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  django:
+  backoffice:
     build: ./src/backoffice/.
     depends_on:
       migrations:
@@ -35,9 +35,24 @@ services:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${SECRET_KEY}
       TIME_ZONE: ${TIME_ZONE}
+      NOTIFY_COOLDOWN_MINUTES: ${NOTIFY_COOLDOWN_MINUTES}
     ports:
       - "127.0.0.1:8000:8000"
     command: gunicorn main.wsgi:application --bind 0.0.0.0:8000
+  notifier:
+    build: ./src/backoffice/.
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      SECRET_KEY: ${SECRET_KEY}
+      NOTIFY_COOLDOWN_MINUTES: ${NOTIFY_COOLDOWN_MINUTES}
+    command: python manage.py notifier
   migrations:
     build: ./src/backoffice/.
     depends_on:
@@ -50,6 +65,7 @@ services:
       POSTGRES_HOST: ${POSTGRES_HOST}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       SECRET_KEY: ${SECRET_KEY}
+      NOTIFY_COOLDOWN_MINUTES: ${NOTIFY_COOLDOWN_MINUTES}
     command: python manage.py migrate
   collectstatic:
     build: ./src/backoffice/.
@@ -65,6 +81,7 @@ services:
       POSTGRES_HOST: ${POSTGRES_HOST}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       SECRET_KEY: ${SECRET_KEY}
+      NOTIFY_COOLDOWN_MINUTES: ${NOTIFY_COOLDOWN_MINUTES}
     command: python manage.py collectstatic --noinput
   fetcher:
     build: ./src/fetcher/.

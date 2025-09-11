@@ -144,3 +144,7 @@ STATIC_ROOT = "/app/static"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# notifier settings
+NOTIFY_COOLDOWN_MINUTES = env.int("NOTIFY_COOLDOWN_MINUTES")
+NOTIFIER_SLEEP_SECONDS = 10
