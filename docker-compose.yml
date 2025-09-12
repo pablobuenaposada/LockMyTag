@@ -52,7 +52,9 @@ services:
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       SECRET_KEY: ${SECRET_KEY}
       NOTIFY_COOLDOWN_MINUTES: ${NOTIFY_COOLDOWN_MINUTES}
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
     command: python manage.py notifier
+    restart: unless-stopped
   migrations:
     build: ./src/backoffice/.
     depends_on:

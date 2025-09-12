@@ -19,7 +19,7 @@ docker/migrations-check:
 
 docker/tests:
 	docker compose --env-file .env.local up -d --force-recreate db backoffice
-	docker exec lockmytag-backoffice uv run --group tests pytest tests
+	docker exec lockmytag-backoffice-1 uv run --group tests pytest tests
 
 docker/create-super-user:
 	docker exec lockmytag-backoffice-1 env DJANGO_SUPERUSER_PASSWORD=admin uv run python manage.py createsuperuser --username admin --email foo@bar.com --noinput

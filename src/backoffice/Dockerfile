@@ -6,6 +6,7 @@ COPY api /app/api
 COPY locations /app/locations
 COPY account /app/account
 COPY locks /app/locks
+COPY notifications /app/notifications
 COPY main /app/main
 COPY tests /app/tests
 COPY .python-version manage.py pyproject.toml uv.lock /app/
