@@ -27,3 +27,7 @@ class Lock(TimeStampedModel):
         constraints = [
             models.UniqueConstraint(fields=["tag"], name="unique_tag_per_lock")
         ]
+
+
+class TelegramChat(TimeStampedModel):
+    chat_id = models.BigIntegerField(unique=True)

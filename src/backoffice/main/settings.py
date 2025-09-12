@@ -148,3 +148,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # notifier settings
 NOTIFY_COOLDOWN_MINUTES = env.int("NOTIFY_COOLDOWN_MINUTES")
 NOTIFIER_SLEEP_SECONDS = 10
+TELEGRAM_TOKEN = env("TELEGRAM_TOKEN", default=None)

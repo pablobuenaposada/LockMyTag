@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Lock
+from .models import Lock, TelegramChat
 
 
 class LockAdmin(admin.ModelAdmin):
@@ -9,4 +9,10 @@ class LockAdmin(admin.ModelAdmin):
     list_filter = ["tag__name"]
 
 
+class TelegramChatAdmin(admin.ModelAdmin):
+    list_display = ("chat_id", "created")
+    readonly_fields = ("created", "modified")
+
+
 admin.site.register(Lock, LockAdmin)
+admin.site.register(TelegramChat, TelegramChatAdmin)

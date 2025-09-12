@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import logging
 import time
@@ -10,6 +11,7 @@ from django.utils import timezone
 
 from locations.models import TagLocation
 from locks.models import Lock
+from locks.notifications.telegram import send_message, start_telegram_bot
 from locks.utils import is_within_radius
 
 logging.basicConfig(
@@ -24,6 +26,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         logger.info("Starting lock notifier service...")
+
+        start_telegram_bot()
 
         while True:
             last_location_per_tag = TagLocation.objects.filter(
@@ -60,6 +64,11 @@ class Command(BaseCommand):
                         ):
                             logger.info(
                                 f"{Fore.LIGHTRED_EX}Tag {location.tag.name} is out of bounds! notifying ...{Fore.RESET}"
+                            )
+                            asyncio.run(
+                                send_message(
+                                    f"Tag {location.tag.name} is out of bounds! seen <a href='https://www.google.com/maps?q={location.latitude},{location.longitude}'>here</a> at {location.timestamp}"
+                                )
                             )
                             lock.last_notified = timezone.now()
                             lock.save()
