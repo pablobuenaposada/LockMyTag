@@ -17,6 +17,9 @@ class Tag(TimeStampedModel):
     sks = models.CharField(max_length=44, validators=[MinLengthValidator(44)])
     paired_at = models.DateField()
 
+    def __str__(self):
+        return f"Tag {self.name} {self.id}"
+
     def save(self, **kwargs):
         validate_empty(self.master_key)
         validate_empty(self.skn)

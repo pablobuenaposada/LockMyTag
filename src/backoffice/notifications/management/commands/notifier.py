@@ -67,7 +67,7 @@ class Command(BaseCommand):
                             )
                             asyncio.run(
                                 send_message(
-                                    f"Tag {location.tag.name} is out of bounds! seen <a href='https://www.google.com/maps?q={location.latitude},{location.longitude}'>here</a> at {location.timestamp}"
+                                    f"❌ Tag {location.tag.name} is out of bounds! seen <a href='https://www.google.com/maps?q={location.latitude},{location.longitude}'>here</a> at {location.timestamp}"
                                 )
                             )
                             lock.last_notified = timezone.now()
@@ -85,7 +85,7 @@ class Command(BaseCommand):
                             )
                             asyncio.run(
                                 send_message(
-                                    f"Tag {location.tag.name} is back within bounds seen <a href='https://www.google.com/maps?q={location.latitude},{location.longitude}'>here</a> at {location.timestamp}"
+                                    f"✅ Tag {location.tag.name} is back within bounds seen <a href='https://www.google.com/maps?q={location.latitude},{location.longitude}'>here</a> at {location.timestamp}"
                                 )
                             )
                         else:
