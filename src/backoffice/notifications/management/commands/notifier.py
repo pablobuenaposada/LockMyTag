@@ -33,7 +33,7 @@ class Command(BaseCommand):
             last_location_per_tag = TagLocation.objects.filter(
                 pk=Subquery(
                     TagLocation.objects.filter(tag=OuterRef("tag"))
-                    .order_by("-created")
+                    .order_by("-timestamp")
                     .values("pk")[:1]
                 )
             )
