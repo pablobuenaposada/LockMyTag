@@ -4,8 +4,16 @@ from .models import Lock
 
 
 class LockAdmin(admin.ModelAdmin):
-    list_display = ("id", "tag__name", "status", "radius", "last_notified")
-    readonly_fields = ("last_notified", "created", "modified")
+    list_display = (
+        "id",
+        "tag__name",
+        "status",
+        "radius",
+        "schedule_day",
+        "schedule_start_time",
+        "schedule_end_time",
+    )
+    readonly_fields = ("created", "modified")
     list_filter = ["tag__name"]
 
 

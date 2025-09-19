@@ -28,6 +28,7 @@ class Command(BaseCommand):
         logger.info("Starting lock notifier service...")
 
         start_telegram_bot()
+        last_notified = {}  # here we will store the last notified time per tag to avoid spamming
 
         while True:
             last_location_per_tag = TagLocation.objects.filter(
@@ -39,14 +40,10 @@ class Command(BaseCommand):
             )
 
             for location in last_location_per_tag:
-                try:
-                    lock = Lock.objects.get(tag=location.tag, status=Lock.STATUS_ACTIVE)
-                    logger.info(f"Lock found for tag {location.tag.name}")
-                except Lock.DoesNotExist:
-                    logger.info(f"No lock found for tag {location.tag.name}")
-                    lock = None
+                lock = Lock.objects.get_active_applicable_locks(location.tag)
 
                 if lock:
+                    logger.info(f"Lock found for tag {location.tag.name}")
                     if not is_within_radius(
                         lock.latitude,
                         lock.longitude,
@@ -55,8 +52,8 @@ class Command(BaseCommand):
                         lock.radius,
                     ):
                         if (
-                            not lock.last_notified
-                            or lock.last_notified
+                            location.tag.id not in last_notified
+                            or last_notified[location.tag.id]
                             + datetime.timedelta(
                                 minutes=settings.NOTIFY_COOLDOWN_MINUTES
                             )
@@ -70,16 +67,15 @@ class Command(BaseCommand):
                                     f"❌ Tag {location.tag.name} is out of bounds! seen <a href='https://www.google.com/maps?q={location.latitude},{location.longitude}'>here</a> at {location.timestamp}"
                                 )
                             )
-                            lock.last_notified = timezone.now()
-                            lock.save()
+                            last_notified[location.tag.id] = timezone.now()
                         else:
                             logger.info(
                                 f"{Fore.LIGHTRED_EX}Tag {location.tag.name} is out of bounds! but already notified so skipping...{Fore.RESET}"
                             )
-                    else:
-                        if lock.last_notified is not None:
-                            lock.last_notified = None
-                            lock.save()
+                    else:  # tag is within bounds
+                        if location.tag.id in last_notified:
+                            # was previously out of bounds
+                            del last_notified[location.tag.id]
                             logger.info(
                                 f"{Fore.GREEN}Tag {location.tag.name} is back within bounds, notifying ...{Fore.RESET}"
                             )
@@ -92,5 +88,19 @@ class Command(BaseCommand):
                             logger.info(
                                 f"{Fore.GREEN}Tag {location.tag.name} is within bounds{Fore.RESET}"
                             )
+                else:
+                    # no lock found, treat as "back within bounds" if previously notified
+                    if location.tag.id in last_notified:
+                        del last_notified[location.tag.id]
+                        logger.info(
+                            f"{Fore.GREEN}Tag {location.tag.name} is back within bounds because lock has expired, notifying ...{Fore.RESET}"
+                        )
+                        asyncio.run(
+                            send_message(
+                                f"✅ Tag {location.tag.name} is back within bounds because lock has expired, seen <a href='https://www.google.com/maps?q={location.latitude},{location.longitude}'>here</a> at {location.timestamp}"
+                            )
+                        )
+                    else:
+                        logger.info(f"No lock found for tag {location.tag.name}")
 
                 time.sleep(settings.NOTIFIER_SLEEP_SECONDS)
