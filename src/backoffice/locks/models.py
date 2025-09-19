@@ -4,6 +4,7 @@ from django_extensions.db.models import TimeStampedModel
 from simple_history.models import HistoricalRecords
 
 from locations.models import Tag
+from locks.managers import LockManager
 
 
 class Lock(TimeStampedModel):
@@ -28,14 +29,13 @@ class Lock(TimeStampedModel):
     status = models.CharField(
         max_length=8, choices=STATUS_CHOICES, default=STATUS_ACTIVE
     )
-    last_notified = models.DateTimeField(
-        null=True, blank=True, help_text="last time that the lock has been notified"
-    )
+
     schedule_day = models.IntegerField(choices=DAYS_OF_WEEK, null=True, blank=True)
     schedule_start_time = models.TimeField(null=True, blank=True)
     schedule_end_time = models.TimeField(null=True, blank=True)
 
     history = HistoricalRecords()
+    objects = LockManager()
 
     def _check_schedule_field(self):
         """Ensure that if any schedule field is set, all must be set"""
