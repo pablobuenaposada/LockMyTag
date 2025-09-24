@@ -24,7 +24,7 @@ class Lock(TimeStampedModel):
     objects = LockManager()
 
 
-class LockSchedule(TimeStampedModel):
+class LockSchedule(models.Model):
     DAYS_OF_WEEK = [
         (0, "Monday"),
         (1, "Tuesday"),
