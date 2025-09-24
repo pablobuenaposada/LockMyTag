@@ -12,6 +12,19 @@ class Lock(TimeStampedModel):
     STATUS_INACTIVE = "inactive"
     STATUS_CHOICES = [(STATUS_ACTIVE, "Active"), (STATUS_INACTIVE, "Inactive")]
 
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    latitude = models.FloatField(help_text="center latitude")
+    longitude = models.FloatField(help_text="center longitude")
+    radius = models.IntegerField(help_text="in meters")
+    status = models.CharField(
+        max_length=8, choices=STATUS_CHOICES, default=STATUS_ACTIVE
+    )
+
+    history = HistoricalRecords()
+    objects = LockManager()
+
+
+class LockSchedule(TimeStampedModel):
     DAYS_OF_WEEK = [
         (0, "Monday"),
         (1, "Tuesday"),
@@ -21,71 +34,36 @@ class Lock(TimeStampedModel):
         (5, "Saturday"),
         (6, "Sunday"),
     ]
+    lock = models.ForeignKey(Lock, related_name="schedules", on_delete=models.CASCADE)
+    day = models.IntegerField(choices=DAYS_OF_WEEK)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
 
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    latitude = models.FloatField(help_text="center latitude")
-    longitude = models.FloatField(help_text="center longitude")
-    radius = models.IntegerField(help_text="in meters")
-    status = models.CharField(
-        max_length=8, choices=STATUS_CHOICES, default=STATUS_ACTIVE
-    )
-
-    schedule_day = models.IntegerField(choices=DAYS_OF_WEEK, null=True, blank=True)
-    schedule_start_time = models.TimeField(null=True, blank=True)
-    schedule_end_time = models.TimeField(null=True, blank=True)
-
-    history = HistoricalRecords()
-    objects = LockManager()
-
-    def _check_schedule_field(self):
-        """Ensure that if any schedule field is set, all must be set"""
-        schedule_fields = [
-            self.schedule_day,
-            self.schedule_start_time,
-            self.schedule_end_time,
-        ]
-        if any(field is not None for field in schedule_fields) and not all(
-            field is not None for field in schedule_fields
-        ):
-            raise ValidationError(
-                "All schedule fields (day, start time, end time) must be filled if any of them is set"
-            )
+    def _intervals_overlap(self, other_start, other_end):
+        """check if two time intervals overlap with current one"""
+        return self.start_time < other_end and self.end_time > other_start
 
     def _check_overlap(self):
-        # only proceed if all schedule fields are set
-        if not all(
-            field is not None
-            for field in [
-                self.schedule_day,
-                self.schedule_start_time,
-                self.schedule_end_time,
-            ]
-        ):
-            return
-
-        # query for locks with the same tag and day
-        qs = Lock.objects.filter(
-            tag=self.tag,
-            schedule_day=self.schedule_day,
+        qs = LockSchedule.objects.filter(
+            lock=self.lock,
+            day=self.day,
         )
-
-        # exclude the current lock if it's already saved
         if self.pk:
+            # exclude self to avoid false positive overlap with itself in case of editing an existing schedule
             qs = qs.exclude(pk=self.pk)
-
-        for lock in qs:
-            if (
-                self.schedule_start_time < lock.schedule_end_time
-                and self.schedule_end_time > lock.schedule_start_time
-            ):
+        for schedule in qs:
+            if self._intervals_overlap(schedule.start_time, schedule.end_time):
                 raise ValidationError(
-                    "Lock schedule times overlap with another lock for the same tag and day"
+                    "Lock schedule times overlap with another schedule for the same lock and day"
                 )
 
     def clean(self):
         super().clean()
-        self._check_schedule_field()
-        self._check_overlap()
+        # only run custom validation if both times are present
+        if self.start_time is not None and self.end_time is not None:
+            if self.start_time >= self.end_time:
+                raise ValidationError("Start time must be before end time")
+            self._check_overlap()
 
     def save(self, *args, **kwargs):
         self.full_clean()
