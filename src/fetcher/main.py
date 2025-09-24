@@ -65,38 +65,34 @@ while True:
             identifier=None,
         )
 
-        reports = account.fetch_last_reports(accessory)
-        logger.info(
-            f"{Fore.MAGENTA}Found {len(reports)} report(s) for {tag['name']}{Fore.RESET}"
+        report = account.fetch_location(accessory)
+        response = requests.post(
+            LOCATIONS_ENDPOINT,
+            json={
+                "tag": tag["id"],
+                "latitude": report.latitude,
+                "longitude": report.longitude,
+                "timestamp": report.timestamp.isoformat(),
+            },
         )
-        for report in reports:
-            response = requests.post(
-                LOCATIONS_ENDPOINT,
-                json={
-                    "tag": tag["id"],
-                    "latitude": report.latitude,
-                    "longitude": report.longitude,
-                    "timestamp": report.timestamp.isoformat(),
-                },
+
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError:
+            if (
+                response.content
+                == b'{"non_field_errors":["The fields tag, latitude, longitude, timestamp must make a unique set."]}'
+            ):
+                logger.info(
+                    f"{Fore.LIGHTYELLOW_EX}Location for {tag['name']} already exists in the system{Fore.RESET}"
+                )
+            else:
+                raise
+        else:
+            logger.info(
+                f"{Fore.GREEN}New location for {tag['name']} at {report.timestamp} lat:{report.latitude} lon:{report.longitude} saved{Fore.RESET}"
             )
 
-            try:
-                response.raise_for_status()
-            except requests.exceptions.HTTPError:
-                if (
-                    response.content
-                    == b'{"non_field_errors":["The fields tag, latitude, longitude, timestamp must make a unique set."]}'
-                ):
-                    logger.info(
-                        f"{Fore.LIGHTYELLOW_EX}Location for {tag['name']} already exists in the system{Fore.RESET}"
-                    )
-                else:
-                    raise
-            else:
-                logger.info(
-                    f"{Fore.GREEN}New location for {tag['name']} at {report.timestamp} lat:{report.latitude} lon:{report.longitude} saved{Fore.RESET}"
-                )
-
-            logger.info(f"Location report: {report.hashed_adv_key_b64} sent to api")
+        logger.info(f"Location report: {report.hashed_adv_key_b64} sent to api")
 
         time.sleep(SLEEP_SECONDS)

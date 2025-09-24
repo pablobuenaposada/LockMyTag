@@ -6,12 +6,9 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "colorama>=0.4.6",
-    "findmy",
+    "findmy>=0.9.2",
     "requests>=2.32.5",
 ]
-
-[tool.uv.sources]
-findmy = { git = "https://github.com/malmeloo/FindMy.py.git", rev = "main" }
 
 [dependency-groups]
 tests = [
