@@ -15,7 +15,7 @@ class LockScheduleInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["start_time"].initial = "00:00:00"
-        self.fields["end_time"].initial = "23:59:59.999999"
+        self.fields["end_time"].initial = "23:59:59"
 
 
 class LockScheduleInlineFormSet(BaseInlineFormSet):
@@ -47,6 +47,7 @@ class LockScheduleInline(admin.TabularInline):
     extra = 0
     form = LockScheduleInlineForm
     formset = LockScheduleInlineFormSet
+    ordering = ("day", "start_time")
 
 
 class LockAdmin(admin.ModelAdmin):
