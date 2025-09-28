@@ -6,6 +6,7 @@ import time
 import requests
 from colorama import Fore
 from findmy import FindMyAccessory
+from findmy.errors import UnhandledProtocolError
 
 from apple.account import login
 from constants import (
@@ -38,7 +39,7 @@ def fetch_tags():
     tags = tags_response.json()
     if not tags:
         logger.error(f"{Fore.RED}No tags found, exiting...{Fore.RESET}")
-        return
+        return []
     logger.info(
         f"{Fore.GREEN}Found {len(tags)} tag(s): {', '.join(tag['name'] for tag in tags)}{Fore.RESET}"
     )
@@ -65,7 +66,13 @@ while True:
             identifier=None,
         )
 
-        reports = account.fetch_last_reports(accessory)
+        try:
+            reports = account.fetch_last_reports(accessory)
+        except UnhandledProtocolError:
+            logger.error(
+                f"{Fore.RED}Failed to fetch reports due to UnhandledProtocolError for {tag['name']}, skipping...{Fore.RESET}"
+            )
+            continue
         logger.info(
             f"{Fore.MAGENTA}Found {len(reports)} report(s) for {tag['name']}{Fore.RESET}"
         )
