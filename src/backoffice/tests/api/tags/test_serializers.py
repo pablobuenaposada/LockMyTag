@@ -19,7 +19,9 @@ class TestsTagOutputSerializer:
             "master_key": tag.master_key,
             "skn": tag.skn,
             "sks": tag.sks,
-            "paired_at": tag.paired_at.isoformat(),
+            "paired_at": tag.paired_at.astimezone(
+                timezone.get_current_timezone()
+            ).isoformat(),
             "created": tag.created.astimezone(
                 timezone.get_current_timezone()
             ).isoformat(),

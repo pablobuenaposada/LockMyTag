@@ -60,7 +60,7 @@ while True:
             master_key=base64.b64decode(tag["master_key"])[-28:],
             skn=base64.b64decode(tag["skn"]),
             sks=base64.b64decode(tag["sks"]),
-            paired_at=datetime.datetime.strptime(tag["paired_at"], "%Y-%m-%d"),
+            paired_at=datetime.datetime.fromisoformat(tag["paired_at"]),
             name=None,
             model=None,
             identifier=None,
