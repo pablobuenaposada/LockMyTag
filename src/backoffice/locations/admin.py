@@ -21,6 +21,7 @@ class TagLocationAdmin(admin.ModelAdmin):
         "google_maps_link",
     )
     list_filter = ["tag__name", "timestamp"]
+    ordering = ["-timestamp"]
 
     def google_maps_link(self, obj):
         return format_html(
