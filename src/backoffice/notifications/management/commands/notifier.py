@@ -103,4 +103,4 @@ class Command(BaseCommand):
                     else:
                         logger.info(f"No lock found for tag {location.tag.name}")
 
-                time.sleep(settings.NOTIFIER_SLEEP_SECONDS)
+            time.sleep(settings.NOTIFIER_SLEEP_SECONDS)
