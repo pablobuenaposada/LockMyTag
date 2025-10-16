@@ -4,13 +4,13 @@ from faker import Faker
 from model_bakery import baker
 from rest_framework.exceptions import ErrorDetail
 
-from api.locations.serializers import TagLocationInputSerializer
+from api.locations.serializers import TagLocationSerializer
 from locations.models import Tag
 
 
 @pytest.mark.django_db
-class TestsTagLocationInputSerializer:
-    serializer_class = TagLocationInputSerializer
+class TestsTagLocationSerializer:
+    serializer_class = TagLocationSerializer
 
     @pytest.fixture(autouse=True)
     def setup_class(self):
