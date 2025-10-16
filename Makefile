@@ -12,6 +12,8 @@ local/format:
 	uv --directory src/fetcher run --group tests ruff format
 	uv --directory src/fetcher run --group tests ruff check --fix
 	npx dclint . -r --fix
+	cd src/frontend && npx eslint --fix
+	cd src/frontend && npx stylelint "**/*.css" --fix
 
 docker/migrations-check:
 	docker compose --env-file .env.local up -d --force-recreate db backoffice
