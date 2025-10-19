@@ -20,7 +20,9 @@ body {
   padding: 16px;
   overflow-y: auto;
   z-index: 1000;
-  font-family: San Francisco;
+  font-family:
+    San Francisco,
+    sans-serif;
 }
 
 #sidebar h2 {

@@ -44,22 +44,23 @@ function murmurhash3(str) {
 function hslToHex(h, s, l) {
   s /= 100;
   l /= 100;
-  const k = n => (n + h / 30) % 12;
+  const k = (n) => (n + h / 30) % 12;
   const a = s * Math.min(l, 1 - l);
-  const f = n =>
+  const f = (n) =>
     l - a * Math.max(-1, Math.min(Math.min(k(n) - 3, 9 - k(n)), 1));
-  const rgb = [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4))];
-  return (
-    "#" +
-    rgb.map(x => x.toString(16).padStart(2, "0")).join("")
-  );
+  const rgb = [
+    Math.round(255 * f(0)),
+    Math.round(255 * f(8)),
+    Math.round(255 * f(4)),
+  ];
+  return "#" + rgb.map((x) => x.toString(16).padStart(2, "0")).join("");
 }
 
 function stringToColor(str) {
   const hash = murmurhash3(str);
   const hue = hash % 360;
-  const sat = 60 + (hash >> 8) % 30; // 60-89%
-  const light = 40 + (hash >> 16) % 20; // 40-59%
+  const sat = 60 + ((hash >> 8) % 30); // 60-89%
+  const light = 40 + ((hash >> 16) % 20); // 40-59%
   const hsl = `hsl(${hue}, ${sat}%, ${light}%)`;
   const hex = hslToHex(hue, sat, light);
   return { hsl, hex };
@@ -92,28 +93,33 @@ fetchLatestLocationsForAllTags()
           `<b>${loc.name}</b><br>${loc.timestamp}<br>
            <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank">
              View on Google Maps
-           </a>`
+           </a>`,
         );
       markersByTag[loc.name] = marker;
     });
-    const bounds = locations.map((loc) => [Number(loc.latitude), Number(loc.longitude)]);
+    const bounds = locations.map((loc) => [
+      Number(loc.latitude),
+      Number(loc.longitude),
+    ]);
     if (bounds.length) {
       map.fitBounds(bounds);
     }
 
     // Populate sidebar with tag rows
-    const sidebar = document.getElementById('sidebar');
-    sidebar.innerHTML = '<h2>Tags</h2>' +
-  locations.map(loc =>
-    `<div class="tag-row" data-tag="${loc.name}" style="background:${stringToColor(loc.name).hex}33;">
+    const sidebar = document.getElementById("tags-list");
+    sidebar.innerHTML = locations
+      .map(
+        (loc) =>
+          `<div class="tag-row" data-tag="${loc.name}" style="background:${stringToColor(loc.name).hex}33;">
   ${loc.name} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
-</div>`
-  ).join('');
+</div>`,
+      )
+      .join("");
 
     // Add click event to each tag row
-    sidebar.querySelectorAll('.tag-row').forEach(row => {
-      row.addEventListener('click', () => {
-        const tag = row.getAttribute('data-tag');
+    sidebar.querySelectorAll(".tag-row").forEach((row) => {
+      row.addEventListener("click", () => {
+        const tag = row.getAttribute("data-tag");
         const marker = markersByTag[tag];
         if (marker) {
           marker.openPopup();
