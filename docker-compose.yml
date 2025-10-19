@@ -90,6 +90,8 @@ services:
     build: ./src/fetcher/.
     environment:
       API_URL: ${API_URL}
+      API_USERNAME: ${API_USERNAME}
+      API_PASSWORD: ${API_PASSWORD}
       SLEEP_SECONDS: ${SLEEP_SECONDS}
       TAGS_REFRESH_SECONDS: ${TAGS_REFRESH_SECONDS}
     restart: unless-stopped

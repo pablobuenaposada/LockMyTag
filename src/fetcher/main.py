@@ -12,9 +12,11 @@ from apple.account import login
 from constants import (
     ACCOUNT_ENDPOINT,
     LOCATIONS_ENDPOINT,
+    PASSWORD,
     SLEEP_SECONDS,
     TAGS_ENDPOINT,
     TAGS_REFRESH_SECONDS,
+    USERNAME,
 )
 
 logging.basicConfig(
@@ -25,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 def fetch_account_and_login():
-    account_response = requests.get(ACCOUNT_ENDPOINT)
+    account_response = requests.get(ACCOUNT_ENDPOINT, auth=(USERNAME, PASSWORD))
     account_response.raise_for_status()
     if not account_response.json():
         logger.error(f"{Fore.RED}No apple account found, exiting...{Fore.RESET}")
@@ -34,7 +36,7 @@ def fetch_account_and_login():
 
 
 def fetch_tags():
-    tags_response = requests.get(TAGS_ENDPOINT)
+    tags_response = requests.get(TAGS_ENDPOINT, auth=(USERNAME, PASSWORD))
     tags_response.raise_for_status()
     tags = tags_response.json()
     if not tags:
@@ -85,6 +87,7 @@ while True:
                     "longitude": report.longitude,
                     "timestamp": report.timestamp.isoformat(),
                 },
+                auth=(USERNAME, PASSWORD),
             )
 
             try:
