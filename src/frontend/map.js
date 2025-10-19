@@ -31,41 +31,37 @@ function createLockIcon(color) {
   });
 }
 
-function stringToColor(str) {
-  // Simple hash to get a number from the string
-  let hash = 0;
+function murmurhash3(str) {
+  let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+    h ^= h >>> 16;
   }
-  // Map hash to hue (0-359)
-  const hue = Math.abs(hash) % 360;
-  const sat = 80;   // Fixed high saturation for vivid color
-  const light = 50; // Fixed lightness for base color
-  const hsl = `hsl(${hue}, ${sat}%, ${light}%)`;
+  return h >>> 0;
+}
 
-  // Convert HSL to RGB for hex output
-  function hslToRgb(h, s, l) {
-    s /= 100;
-    l /= 100;
-    const k = n => (n + h / 30) % 12;
-    const a = s * Math.min(l, 1 - l);
-    const f = n =>
-      l - a * Math.max(-1, Math.min(Math.min(k(n) - 3, 9 - k(n)), 1));
-    return [
-      Math.round(255 * f(0)),
-      Math.round(255 * f(8)),
-      Math.round(255 * f(4)),
-    ];
-  }
-  function rgbToHex([r, g, b]) {
-    return (
-      "#" +
-      [r, g, b]
-        .map(x => x.toString(16).padStart(2, "0"))
-        .join("")
-    );
-  }
-  const hex = rgbToHex(hslToRgb(hue, sat, light));
+function hslToHex(h, s, l) {
+  s /= 100;
+  l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n =>
+    l - a * Math.max(-1, Math.min(Math.min(k(n) - 3, 9 - k(n)), 1));
+  const rgb = [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4))];
+  return (
+    "#" +
+    rgb.map(x => x.toString(16).padStart(2, "0")).join("")
+  );
+}
+
+function stringToColor(str) {
+  const hash = murmurhash3(str);
+  const hue = hash % 360;
+  const sat = 60 + (hash >> 8) % 30; // 60-89%
+  const light = 40 + (hash >> 16) % 20; // 40-59%
+  const hsl = `hsl(${hue}, ${sat}%, ${light}%)`;
+  const hex = hslToHex(hue, sat, light);
   return { hsl, hex };
 }
 
