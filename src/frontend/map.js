@@ -102,7 +102,7 @@ fetchLatestLocationsForAllTags()
       Number(loc.longitude),
     ]);
     if (bounds.length) {
-      map.fitBounds(bounds);
+      map.fitBounds(bounds, { paddingBottomRight: [250, 0] });
     }
 
     // Populate sidebar with tag rows
