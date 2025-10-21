@@ -12,9 +12,7 @@ local/format:
 	uv --directory src/fetcher run --group tests ruff format
 	uv --directory src/fetcher run --group tests ruff check --fix
 	npx dclint . -r --fix
-	cd src/frontend && npx prettier --write "**/*.html"
-	cd src/frontend && npx prettier --write "**/*.js"
-	cd src/frontend && npx prettier --write "**/*.css"
+	cd src/frontend && npx prettier --write "**/*.{js,css,html}"
 	cd src/frontend && npx eslint --fix
 
 docker/migrations-check:
