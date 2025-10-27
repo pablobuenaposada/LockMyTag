@@ -11,9 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/ruff-action@v3
+      - uses: actions/setup-node@v4
         with:
-          args: "format --check"
+          node-version: 'latest'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: |
+          python -m pip install uv
+          cd src/frontend && npm ci
+      - name: Run format checks
+        run: make local/format-check
 
   docker-compose-format:
     name: Run docker compose linter
