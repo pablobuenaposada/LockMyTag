@@ -1,5 +1,6 @@
 import * as L from 'https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js'
-import { fetchLatestLocationsForAllTags } from './api.js'
+import { fetchLatestLocationsForAllTags, fetchLocks } from './api.js'
+import { daysOfWeek } from './constants.js'
 import { lockIconSvg } from './lock.js'
 
 function timeSince(dateString) {
@@ -20,7 +21,6 @@ function timeSince(dateString) {
 }
 
 function createLockIcon(color) {
-  // Add or replace fill attribute in the <svg> tag
   const coloredSvg = lockIconSvg.replace(
     /<svg([^>]*)>/,
     `<svg$1 fill="${color}">`,
@@ -77,9 +77,24 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 }).addTo(map)
 
 fetchLatestLocationsForAllTags()
-  .then((locations) => {
+  .then(async (locations) => {
     const seen = new Set()
     const markersByTag = {}
+    const schedulesByTag = {}
+
+    await Promise.all(
+      locations.map(async (loc) => {
+        const locks = await fetchLocks(loc.tag)
+        schedulesByTag[loc.tag] = locks.flatMap(lock =>
+          lock.schedules.map(s => ({
+            ...s,
+            latitude: lock.latitude,
+            longitude: lock.longitude,
+          })),
+        )
+      }),
+    )
+
     locations.forEach((loc) => {
       let lat = Number(loc.latitude)
       let lng = Number(loc.longitude)
@@ -100,6 +115,7 @@ fetchLatestLocationsForAllTags()
         )
       markersByTag[loc.name] = marker
     })
+
     const bounds = locations.map(loc => [
       Number(loc.latitude),
       Number(loc.longitude),
@@ -108,20 +124,32 @@ fetchLatestLocationsForAllTags()
       map.fitBounds(bounds, { paddingBottomRight: [250, 0] })
     }
 
-    // Populate sidebar with tag rows
     const sidebar = document.getElementById('tags-list')
     sidebar.innerHTML = locations
-      .map(
-        loc =>
-          `<div class="tag-row" data-tag="${loc.name}" style="background:${stringToColor(loc.name).hex}33;">
-  ${loc.name} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
-</div>`,
-      )
+      .map((loc) => {
+        const schedules = (schedulesByTag[loc.tag] || []).slice().sort(
+          (a, b) => a.day - b.day || a.start_time.localeCompare(b.start_time),
+        )
+        const schedulesHtml = schedules.length
+          ? schedules.map((s) => {
+              return `<div>
+        ${daysOfWeek[s.day]} ${s.start_time} - ${s.end_time}
+        <a href="https://www.google.com/maps?q=${s.latitude},${s.longitude}" target="_blank">📍</a>
+      </div>`
+            }).join('')
+          : ''
+        return `<div class="tag-row" data-tag="${loc.name}" data-tag-id="${loc.tag}" style="background:${stringToColor(loc.name).hex}33;">
+          ${loc.name} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
+          <div class="tag-schedules">${schedulesHtml}</div>
+        </div>`
+      })
       .join('')
 
-    // Add click event to each tag row
     sidebar.querySelectorAll('.tag-row').forEach((row) => {
       row.addEventListener('click', () => {
+        sidebar.querySelectorAll('.tag-schedules').forEach(s => s.classList.remove('visible'))
+        row.querySelector('.tag-schedules').classList.add('visible')
+
         const tag = row.getAttribute('data-tag')
         const marker = markersByTag[tag]
         if (marker) {
@@ -130,7 +158,4 @@ fetchLatestLocationsForAllTags()
         }
       })
     })
-  })
-  .catch((error) => {
-    console.error('Fetch error:', error)
   })
