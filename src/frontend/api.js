@@ -25,6 +25,7 @@ export function fetchLatestLocationsForAllTags() {
         tag =>
           fetchLatestLocation(tag.id)
             .then(location => ({
+              tag: location.tag,
               name: tag.name,
               longitude: location.longitude,
               latitude: location.latitude,
@@ -35,4 +36,14 @@ export function fetchLatestLocationsForAllTags() {
       return Promise.all(locationPromises)
     })
     .then(locations => locations.filter(loc => loc !== null))
+}
+
+export function fetchLocks(uuid) {
+  return fetch(`${window.location.origin}/api/locks/${uuid}`).then(
+    (response) => {
+      if (!response.ok)
+        throw new Error('Network response was not ok')
+      return response.json()
+    },
+  )
 }
