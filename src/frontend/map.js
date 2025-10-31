@@ -140,7 +140,9 @@ fetchLatestLocationsForAllTags()
           : ''
         return `<div class="tag-row" data-tag="${loc.name}" data-tag-id="${loc.tag}" style="background:${stringToColor(loc.name).hex}33;">
           ${loc.name} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
-          <div class="tag-schedules">${schedulesHtml}</div>
+          <div class="tag-schedules">${schedulesHtml}
+            <div class="tag-schedules-edit"><a href="${window.location.origin}/admin/locks/lock/?tag__name=${loc.name}">edit schedules</a></div>
+          </div>
         </div>`
       })
       .join('')
