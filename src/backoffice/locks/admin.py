@@ -56,6 +56,8 @@ class LockAdmin(admin.ModelAdmin):
         "tag__name",
         "colored_status",
         "radius",
+        "latitude",
+        "longitude",
     )
     readonly_fields = ("created", "modified")
     list_filter = ["tag__name"]

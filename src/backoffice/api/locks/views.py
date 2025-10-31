@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
@@ -8,6 +9,8 @@ from locks.models import Lock
 
 class LockListByTagView(generics.ListAPIView):
     serializer_class = LockSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["status"]
 
     def get_queryset(self):
         tag_id = self.kwargs.get("tag_id")
