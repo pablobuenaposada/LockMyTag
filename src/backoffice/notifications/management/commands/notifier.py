@@ -6,7 +6,6 @@ import time
 from colorama import Fore
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db.models import OuterRef, Subquery
 from django.utils import timezone
 
 from locations.models import TagLocation
@@ -31,13 +30,9 @@ class Command(BaseCommand):
         last_notified = {}  # here we will store the last notified time per tag to avoid spamming
 
         while True:
-            last_location_per_tag = TagLocation.objects.filter(
-                pk=Subquery(
-                    TagLocation.objects.filter(tag=OuterRef("tag"))
-                    .order_by("-timestamp")
-                    .values("pk")[:1]
-                )
-            )
+            last_location_per_tag = TagLocation.objects.order_by(
+                "tag", "-timestamp"
+            ).distinct("tag")
 
             for location in last_location_per_tag:
                 lock = Lock.objects.get_active_applicable_locks(location.tag)
