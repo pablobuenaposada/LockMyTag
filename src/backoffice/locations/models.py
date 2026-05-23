@@ -40,3 +40,8 @@ class TagLocation(TimeStampedModel):
 
     class Meta:
         unique_together = (("tag", "latitude", "longitude", "timestamp"),)
+        indexes = [
+            models.Index(
+                fields=["tag", "-timestamp"], name="taglocation_tag_timestamp_idx"
+            ),
+        ]

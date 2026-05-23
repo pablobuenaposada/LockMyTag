@@ -1,5 +1,11 @@
 import * as L from 'https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js'
-import { fetchLatestLocationsForAllTags, fetchLocks } from './api.js'
+import {
+  clearCredentials,
+  fetchLatestLocationsForAllTags,
+  fetchLocks,
+  setCredentials,
+  UnauthorizedError,
+} from './api.js'
 import { daysOfWeek } from './constants.js'
 import { lockIconSvg } from './lock.js'
 
@@ -76,88 +82,150 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '',
 }).addTo(map)
 
-fetchLatestLocationsForAllTags()
-  .then(async (locations) => {
-    const seen = new Set()
-    const markersByTag = {}
-    const schedulesByTag = {}
+// Show entire world map
+map.fitBounds([[-85, -180], [85, 180]])
 
-    await Promise.all(
-      locations.map(async (loc) => {
-        const locks = await fetchLocks(loc.tag)
-        schedulesByTag[loc.tag] = locks.flatMap(lock =>
-          lock.schedules.map(s => ({
-            ...s,
-            latitude: lock.latitude,
-            longitude: lock.longitude,
-          })),
-        )
-      }),
-    )
+const sidebar = document.getElementById('tags-list')
+sidebar.parentElement.classList.add('hidden')
+let loginTemplatePromise
 
-    locations.forEach((loc) => {
-      let lat = Number(loc.latitude)
-      let lng = Number(loc.longitude)
-      const key = `${lat},${lng}`
-      if (seen.has(key)) {
-        lat += (Math.random() - 0.5) * 0.0002
-        lng += (Math.random() - 0.5) * 0.0002
-      }
-      seen.add(key)
-      const icon = createLockIcon(stringToColor(loc.name).hsl)
-      const marker = L.marker([lat, lng], { icon })
-        .addTo(map)
-        .bindPopup(
-          `<b>${loc.name}</b><br>${loc.timestamp}<br>
-           <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank">
-             View on Google Maps
-           </a>`,
-        )
-      markersByTag[loc.name] = marker
-    })
+function loadLoginTemplate() {
+  if (!loginTemplatePromise) {
+    loginTemplatePromise = fetch(`${window.location.origin}/login.html`)
+      .then((response) => {
+        if (!response.ok)
+          throw new Error('Could not load login template')
+        return response.text()
+      })
+  }
+  return loginTemplatePromise
+}
 
-    const bounds = locations.map(loc => [
-      Number(loc.latitude),
-      Number(loc.longitude),
-    ])
-    if (bounds.length) {
-      map.fitBounds(bounds, { paddingBottomRight: [250, 0] })
+async function showLoginPage() {
+  let loginPage = document.getElementById('login-page')
+  if (!loginPage) {
+    loginPage = document.createElement('div')
+    loginPage.id = 'login-page'
+    loginPage.innerHTML = await loadLoginTemplate()
+    document.body.appendChild(loginPage)
+  }
+
+  const loginError = document.getElementById('login-error')
+  if (!loginError)
+    return
+
+  loginError.textContent = ''
+
+  const form = document.getElementById('login-form')
+  form.onsubmit = async (event) => {
+    event.preventDefault()
+    const username = document.getElementById('username').value
+    const password = document.getElementById('password').value
+
+    setCredentials(username, password)
+    try {
+      await loadMap()
+      loginPage.remove()
     }
+    catch (error) {
+      clearCredentials()
+      loginError.textContent
+        = error instanceof UnauthorizedError
+          ? 'Invalid username or password. Please try again.'
+          : 'Could not login right now. Please try again.'
+    }
+  }
+}
 
-    const sidebar = document.getElementById('tags-list')
-    sidebar.innerHTML = locations
-      .map((loc) => {
-        const schedules = (schedulesByTag[loc.tag] || []).slice().sort(
-          (a, b) => a.day - b.day || a.start_time.localeCompare(b.start_time),
-        )
-        const schedulesHtml = schedules.length
-          ? schedules.map((s) => {
-              return `<div>
-        ${daysOfWeek[s.day]} ${s.start_time} - ${s.end_time}
-        <a href="https://www.google.com/maps?q=${s.latitude},${s.longitude}" target="_blank">📍</a>
+async function loadMap() {
+  const locations = await fetchLatestLocationsForAllTags()
+  const seen = new Set()
+  const markersByTag = {}
+  const schedulesByTag = {}
+
+  await Promise.all(
+    locations.map(async (loc) => {
+      const locks = await fetchLocks(loc.tag)
+      schedulesByTag[loc.tag] = locks.flatMap(lock =>
+        lock.schedules.map(s => ({
+          ...s,
+          latitude: lock.latitude,
+          longitude: lock.longitude,
+        })),
+      )
+    }),
+  )
+
+  locations.forEach((loc) => {
+    let lat = Number(loc.latitude)
+    let lng = Number(loc.longitude)
+    const key = `${lat},${lng}`
+    if (seen.has(key)) {
+      lat += (Math.random() - 0.5) * 0.0002
+      lng += (Math.random() - 0.5) * 0.0002
+    }
+    seen.add(key)
+    const icon = createLockIcon(stringToColor(loc.name).hsl)
+    const marker = L.marker([lat, lng], { icon })
+      .addTo(map)
+      .bindPopup(
+        `<b>${loc.name}</b><br>${loc.timestamp}<br>
+         <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank">
+           View on Google Maps
+         </a>`,
+      )
+    markersByTag[loc.name] = marker
+  })
+
+  const bounds = locations.map(loc => [
+    Number(loc.latitude),
+    Number(loc.longitude),
+  ])
+  if (bounds.length) {
+    map.fitBounds(bounds, { paddingBottomRight: [250, 0] })
+  }
+
+  sidebar.innerHTML = locations
+    .map((loc) => {
+      const schedules = (schedulesByTag[loc.tag] || []).slice().sort(
+        (a, b) => a.day - b.day || a.start_time.localeCompare(b.start_time),
+      )
+      const schedulesHtml = schedules.length
+        ? schedules.map((s) => {
+            return `<div>
+      ${daysOfWeek[s.day]} ${s.start_time} - ${s.end_time}
+      <a href="https://www.google.com/maps?q=${s.latitude},${s.longitude}" target="_blank">📍</a>
+    </div>`
+          }).join('')
+        : ''
+      return `<div class="tag-row" data-tag="${loc.name}" data-tag-id="${loc.tag}" style="background:${stringToColor(loc.name).hex}33;">
+        ${loc.name} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
+        <div class="tag-schedules">${schedulesHtml}
+          <div class="tag-schedules-edit"><a href="${window.location.origin}/admin/locks/lock/?tag__name=${loc.name}">edit schedules</a></div>
+        </div>
       </div>`
-            }).join('')
-          : ''
-        return `<div class="tag-row" data-tag="${loc.name}" data-tag-id="${loc.tag}" style="background:${stringToColor(loc.name).hex}33;">
-          ${loc.name} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
-          <div class="tag-schedules">${schedulesHtml}
-            <div class="tag-schedules-edit"><a href="${window.location.origin}/admin/locks/lock/?tag__name=${loc.name}">edit schedules</a></div>
-          </div>
-        </div>`
-      })
-      .join('')
+    })
+    .join('')
 
-    sidebar.querySelectorAll('.tag-row').forEach((row) => {
-      row.addEventListener('click', () => {
-        sidebar.querySelectorAll('.tag-schedules').forEach(s => s.classList.remove('visible'))
-        row.querySelector('.tag-schedules').classList.add('visible')
+  sidebar.querySelectorAll('.tag-row').forEach((row) => {
+    row.addEventListener('click', () => {
+      sidebar.querySelectorAll('.tag-schedules').forEach(s => s.classList.remove('visible'))
+      row.querySelector('.tag-schedules').classList.add('visible')
 
-        const tag = row.getAttribute('data-tag')
-        const marker = markersByTag[tag]
-        if (marker) {
-          marker.openPopup()
-          map.setView(marker.getLatLng(), 17, { animate: true })
-        }
-      })
+      const tag = row.getAttribute('data-tag')
+      const marker = markersByTag[tag]
+      if (marker) {
+        marker.openPopup()
+        map.setView(marker.getLatLng(), 17, { animate: true })
+      }
     })
   })
+
+  sidebar.parentElement.classList.remove('hidden')
+}
+
+loadMap().catch((error) => {
+  if (error instanceof UnauthorizedError) {
+    showLoginPage()
+  }
+})
