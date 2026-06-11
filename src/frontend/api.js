@@ -1,5 +1,3 @@
-const AUTH_STORAGE_KEY = 'lockmytag.basicAuth'
-
 export class UnauthorizedError extends Error {
   constructor() {
     super('Unauthorized')
@@ -7,14 +5,9 @@ export class UnauthorizedError extends Error {
   }
 }
 
-function getAuthHeaders() {
-  const auth = window.sessionStorage.getItem(AUTH_STORAGE_KEY)
-  return auth ? { Authorization: auth } : {}
-}
-
 async function requestJson(path) {
   const response = await fetch(`${window.location.origin}${path}`, {
-    headers: getAuthHeaders(),
+    credentials: 'same-origin', // send session cookie automatically
   })
 
   if (response.status === 401 || response.status === 403)
@@ -26,13 +19,39 @@ async function requestJson(path) {
   return response.json()
 }
 
-export function setCredentials(username, password) {
-  const encoded = window.btoa(`${username}:${password}`)
-  window.sessionStorage.setItem(AUTH_STORAGE_KEY, `Basic ${encoded}`)
+export async function setCredentials(username, password) {
+  // Exchange username/password for a session cookie — password hashing happens once only
+  const csrfToken = await getCsrfToken()
+  const response = await fetch(`${window.location.origin}/api/account/login/`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken,
+    },
+    body: JSON.stringify({ username, password }),
+  })
+  if (response.status === 401 || response.status === 403)
+    throw new UnauthorizedError()
+  if (!response.ok)
+    throw new Error('Login failed')
 }
 
 export function clearCredentials() {
-  window.sessionStorage.removeItem(AUTH_STORAGE_KEY)
+  // Simply navigate away — the session cookie will expire on its own,
+  // or we could call a logout endpoint if added later.
+  document.cookie = 'sessionid=; Max-Age=0; path=/'
+}
+
+async function getCsrfToken() {
+  // Django sets csrftoken cookie on any GET request to a Django view
+  await fetch(`${window.location.origin}/api/account/login/`, {
+    method: 'GET',
+    credentials: 'same-origin',
+  })
+  // Read from cookie
+  const match = document.cookie.match(/csrftoken=([^;]+)/)
+  return match ? match[1] : ''
 }
 
 export function fetchTags() {

@@ -122,8 +122,8 @@ async function showLoginPage() {
     const username = document.getElementById('username').value
     const password = document.getElementById('password').value
 
-    setCredentials(username, password)
     try {
+      await setCredentials(username, password)
       await loadMap()
       loginPage.remove()
     }
