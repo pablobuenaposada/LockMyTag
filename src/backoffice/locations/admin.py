@@ -15,6 +15,7 @@ class TagLocationAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "tag__name",
+        "battery_badge",
         "latitude",
         "longitude",
         "timestamp",
@@ -29,6 +30,22 @@ class TagLocationAdmin(admin.ModelAdmin):
             obj.google_maps_url,
             obj.google_maps_url,
         )
+
+    def battery_badge(self, obj):
+        color_by_level = {
+            TagLocation.BatteryLevel.FULL: "#16a34a",
+            TagLocation.BatteryLevel.MEDIUM: "#ca8a04",
+            TagLocation.BatteryLevel.LOW: "#ea580c",
+            TagLocation.BatteryLevel.VERY_LOW: "#dc2626",
+        }
+        label = obj.get_battery_display() if obj.battery else "None"
+        color = color_by_level.get(obj.battery, "#6b7280")
+        return format_html(
+            '<span style="color: {}; font-weight: 600;">{}</span>', color, label
+        )
+
+    battery_badge.short_description = "battery"
+    battery_badge.admin_order_field = "battery"
 
 
 admin.site.register(Tag, TagAdmin)

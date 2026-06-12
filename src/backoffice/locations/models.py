@@ -29,10 +29,23 @@ class Tag(TimeStampedModel):
 
 
 class TagLocation(TimeStampedModel):
+    class BatteryLevel(models.TextChoices):
+        FULL = "full", "Full"
+        MEDIUM = "medium", "Medium"
+        LOW = "low", "Low"
+        VERY_LOW = "very_low", "Very low"
+
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     latitude = models.DecimalField(max_digits=10, decimal_places=7)
     longitude = models.DecimalField(max_digits=10, decimal_places=7)
     timestamp = models.DateTimeField()
+    battery = models.CharField(
+        max_length=8,
+        choices=BatteryLevel.choices,
+        null=True,
+        blank=True,
+        default=None,
+    )
 
     @property
     def google_maps_url(self):

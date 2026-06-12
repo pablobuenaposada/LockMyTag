@@ -5,7 +5,7 @@ from model_bakery import baker
 from rest_framework.exceptions import ErrorDetail
 
 from api.locations.serializers import TagLocationSerializer
-from locations.models import Tag
+from locations.models import Tag, TagLocation
 
 
 @pytest.mark.django_db
@@ -44,6 +44,7 @@ class TestsTagLocationSerializer:
                 "latitude": self.latitude,
                 "longitude": self.longitude,
                 "timestamp": self.timestamp,
+                "battery": TagLocation.BatteryLevel.FULL,
             }
         )
 
@@ -53,4 +54,5 @@ class TestsTagLocationSerializer:
             "latitude": self.latitude,
             "longitude": self.longitude,
             "timestamp": self.timestamp.replace(tzinfo=timezone.get_current_timezone()),
+            "battery": TagLocation.BatteryLevel.FULL,
         }

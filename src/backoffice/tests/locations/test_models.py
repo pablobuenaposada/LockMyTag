@@ -96,6 +96,7 @@ class TestTagLocation:
             "latitude": self.latitude,
             "longitude": self.longitude,
             "timestamp": ANY,
+            "battery": None,
         }
         tag_location = TagLocation.objects.create(
             tag=tag,

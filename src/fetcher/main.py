@@ -10,6 +10,7 @@ from findmy import FindMyAccessory
 from apple.account import login
 from constants import (
     ACCOUNT_ENDPOINT,
+    BATTERY_LEVEL,
     LOCATIONS_ENDPOINT,
     PASSWORD,
     SLEEP_SECONDS,
@@ -47,6 +48,10 @@ def fetch_tags():
     return tags
 
 
+def get_battery_level(report_status):
+    return BATTERY_LEVEL.get((report_status >> 6) & 0b11)
+
+
 account = fetch_account_and_login()
 last_tags_refresh = 0
 
@@ -81,6 +86,7 @@ while True:
                 "latitude": report.latitude,
                 "longitude": report.longitude,
                 "timestamp": report.timestamp.isoformat(),
+                "battery": get_battery_level(report.status),
             },
             auth=(USERNAME, PASSWORD),
         )
