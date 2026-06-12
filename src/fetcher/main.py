@@ -6,7 +6,6 @@ import time
 import requests
 from colorama import Fore
 from findmy import FindMyAccessory
-from findmy.errors import UnhandledProtocolError
 
 from apple.account import login
 from constants import (
@@ -68,45 +67,39 @@ while True:
             identifier=None,
         )
 
-        try:
-            reports = account.fetch_last_reports(accessory)
-        except UnhandledProtocolError:
-            logger.error(
-                f"{Fore.RED}Failed to fetch reports due to UnhandledProtocolError for {tag['name']}, skipping...{Fore.RESET}"
+        if not (report := account.fetch_location(accessory)):
+            logger.info(
+                f"{Fore.LIGHTYELLOW_EX}No location found for tag {tag['name']}{Fore.RESET}"
             )
             continue
-        logger.info(
-            f"{Fore.MAGENTA}Found {len(reports)} report(s) for {tag['name']}{Fore.RESET}"
+
+        logger.info(f"{Fore.MAGENTA}Found report for {tag['name']}{Fore.RESET}")
+        response = requests.post(
+            LOCATIONS_ENDPOINT,
+            json={
+                "tag": tag["id"],
+                "latitude": report.latitude,
+                "longitude": report.longitude,
+                "timestamp": report.timestamp.isoformat(),
+            },
+            auth=(USERNAME, PASSWORD),
         )
-        for report in reports:
-            response = requests.post(
-                LOCATIONS_ENDPOINT,
-                json={
-                    "tag": tag["id"],
-                    "latitude": report.latitude,
-                    "longitude": report.longitude,
-                    "timestamp": report.timestamp.isoformat(),
-                },
-                auth=(USERNAME, PASSWORD),
-            )
 
-            try:
-                response.raise_for_status()
-            except requests.exceptions.HTTPError:
-                if (
-                    response.content
-                    == b'{"non_field_errors":["The fields tag, latitude, longitude, timestamp must make a unique set."]}'
-                ):
-                    logger.info(
-                        f"{Fore.LIGHTYELLOW_EX}Location for {tag['name']} already exists in the system{Fore.RESET}"
-                    )
-                else:
-                    raise
-            else:
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError:
+            if (
+                response.content
+                == b'{"non_field_errors":["The fields tag, latitude, longitude, timestamp must make a unique set."]}'
+            ):
                 logger.info(
-                    f"{Fore.GREEN}New location for {tag['name']} at {report.timestamp} lat:{report.latitude} lon:{report.longitude} saved{Fore.RESET}"
+                    f"{Fore.LIGHTYELLOW_EX}Location for {tag['name']} already exists in the system{Fore.RESET}"
                 )
-
-            logger.info(f"Location report: {report.hashed_adv_key_b64} sent to api")
+            else:
+                raise
+        else:
+            logger.info(
+                f"{Fore.GREEN}New location for {tag['name']} at {report.timestamp} lat:{report.latitude} lon:{report.longitude} saved{Fore.RESET}"
+            )
 
         time.sleep(SLEEP_SECONDS)
