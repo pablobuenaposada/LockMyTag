@@ -2,6 +2,19 @@
   <head>
     <title>LockMyTag</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/maplibre-gl@6.8.0/dist/maplibre-gl.css"
+    />
+    <script type="importmap">
+      {
+        "imports": {
+          "leaflet": "https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js",
+          "maplibre-gl": "https://unpkg.com/maplibre-gl@6.8.0/dist/maplibre-gl.mjs",
+          "@maplibre/maplibre-gl-leaflet": "https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/dist/leaflet-maplibre-gl.mjs"
+        }
+      }
+    </script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -10,7 +23,6 @@
       <div id="tags-list"></div>
     </div>
     <div id="map">
-      <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
       <script type="module" src="map.js"></script>
     </div>
   </body>

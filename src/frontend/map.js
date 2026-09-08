@@ -1,4 +1,5 @@
-import * as L from 'https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js'
+import { maplibreGL } from '@maplibre/maplibre-gl-leaflet'
+import * as L from 'leaflet'
 import {
   clearCredentials,
   fetchLatestLocationsForAllTags,
@@ -75,11 +76,13 @@ function stringToColor(str) {
   return { hsl, hex }
 }
 
-const map = L.map('map')
+const map = L.map('map', { maxZoom: 19 })
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  maxZoom: 19,
-  attribution: '',
+maplibreGL({
+  style: 'https://tiles.openfreemap.org/styles/positron',
+  attribution:
+    '<a href="https://openfreemap.org">OpenFreeMap</a> '
+    + '<a href="https://www.openstreetmap.org/copyright">&copy; OpenStreetMap contributors</a>',
 }).addTo(map)
 
 // Show entire world map
