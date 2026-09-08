@@ -40,6 +40,12 @@ body {
   margin-bottom: 12px;
 }
 
+.battery-icon {
+  width: 22px;
+  height: 10px;
+  vertical-align: middle;
+}
+
 .tag-time {
   font-style: italic;
   color: #888;

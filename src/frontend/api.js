@@ -74,6 +74,7 @@ export function fetchLatestLocationsForAllTags() {
               longitude: location.longitude,
               latitude: location.latitude,
               timestamp: location.timestamp,
+              battery: location.battery,
             }))
             .catch(() => null), // Skip if fetch fails (e.g., 404)
       )

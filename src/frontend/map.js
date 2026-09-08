@@ -7,6 +7,7 @@ import {
   setCredentials,
   UnauthorizedError,
 } from './api.js'
+import { batteryIconSvg } from './battery.js'
 import { daysOfWeek } from './constants.js'
 import { lockIconSvg } from './lock.js'
 
@@ -202,7 +203,7 @@ async function loadMap() {
           }).join('')
         : ''
       return `<div class="tag-row" data-tag="${loc.name}" data-tag-id="${loc.tag}" style="background:${stringToColor(loc.name).hex}33;">
-        ${loc.name} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
+        ${loc.name} ${batteryIconSvg(loc.battery)} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
         <div class="tag-schedules">${schedulesHtml}
           <div class="tag-schedules-edit"><a href="${window.location.origin}/admin/locks/lock/?tag__name=${loc.name}">edit schedules</a></div>
         </div>
