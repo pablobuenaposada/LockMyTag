@@ -83,6 +83,16 @@ export function fetchLatestLocationsForAllTags() {
     .then(locations => locations.filter(loc => loc !== null))
 }
 
+export function fetchRoute(uuid, start, end) {
+  const params = new URLSearchParams()
+  if (start)
+    params.set('start', start)
+  if (end)
+    params.set('end', end)
+  const query = params.toString()
+  return requestJson(`/api/locations/route/${uuid}${query ? `?${query}` : ''}`)
+}
+
 export function fetchLocks(uuid) {
   return requestJson(`/api/locks/${uuid}?status=active`)
 }

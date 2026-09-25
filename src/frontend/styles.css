@@ -64,7 +64,7 @@ body {
 
 .tag-schedules.visible {
   padding-top: 5%;
-  max-height: 500px;
+  max-height: 800px;
   opacity: 1;
 }
 
@@ -126,4 +126,66 @@ body {
 .login-error {
   min-height: 20px;
   color: #b00020;
+}
+
+.tag-route {
+  display: grid;
+  gap: 6px;
+  padding-top: 10px;
+  margin-top: 8px;
+  border-top: 1px solid rgb(0 0 0 / 10%);
+  text-align: left;
+  font-size: 13px;
+}
+
+.tag-route-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.tag-route label {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  align-items: center;
+  gap: 6px;
+  color: #555;
+}
+
+.tag-route input[type="date"] {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.tag-route-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.tag-route button {
+  flex: 1;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: #2f6fed;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tag-route .route-clear {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.route-status {
+  min-height: 16px;
+  color: #666;
+  font-style: italic;
 }
