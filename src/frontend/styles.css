@@ -68,6 +68,34 @@ body {
   opacity: 1;
 }
 
+.schedule-pin {
+  border: 0;
+  background: none;
+  padding: 0 2px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.65;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.schedule-pin:hover {
+  opacity: 1;
+}
+
+.schedule-pin.active {
+  opacity: 1;
+  transform: scale(1.25);
+}
+
+.schedule-pin:focus-visible {
+  outline: 2px solid #2f6fed;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .tag-schedules a {
   text-decoration: none;
 }

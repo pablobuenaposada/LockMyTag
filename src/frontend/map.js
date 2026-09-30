@@ -96,6 +96,9 @@ maplibreGL({
 // Show entire world map
 map.fitBounds([[-85, -180], [85, 180]])
 
+map.createPane('lockArea')
+map.getPane('lockArea').style.zIndex = 380
+
 map.createPane('routeBase')
 map.getPane('routeBase').style.zIndex = 390
 const routeBaseRenderer = L.canvas({ pane: 'routeBase', padding: 0.5 })
@@ -154,6 +157,55 @@ async function showLoginPage() {
 
 let routeLayer = null
 let routeFrame = null
+let lockAreaCircle = null
+// Which pin opened the area. Every pin for that lock lights up, but only the
+// one actually clicked puts it away again — otherwise clicking a sibling pin
+// reads as "already shown" and hides the circle you were trying to keep.
+let lockAreaPin = null
+
+function clearLockArea() {
+  if (lockAreaCircle) {
+    map.removeLayer(lockAreaCircle)
+    lockAreaCircle = null
+  }
+  lockAreaPin = null
+}
+
+// The circle a scheduled lock watches: centre plus its radius in metres, drawn
+// so you can see whether the tag is meant to be inside it right now
+function showLockArea(lock, name, color) {
+  clearLockArea()
+
+  const when = lock.schedules
+    .slice()
+    .sort((a, b) => a.day - b.day || a.start_time.localeCompare(b.start_time))
+    .map(s => `${daysOfWeek[s.day]} ${s.start_time} - ${s.end_time}`)
+    .join('<br>')
+
+  lockAreaCircle = L.circle([lock.latitude, lock.longitude], {
+    pane: 'lockArea',
+    radius: lock.radius,
+    color,
+    weight: 2,
+    opacity: 0.85,
+    dashArray: '6 4',
+    fillColor: color,
+    fillOpacity: 0.1,
+  })
+    .bindPopup(
+      `<b>${name}</b><br>Lock area · ${lock.radius} m<br>${when}<br>`
+      + `<a href="https://www.google.com/maps?q=${lock.latitude},${lock.longitude}" target="_blank">View on Google Maps</a>`,
+    )
+    .addTo(map)
+
+  // A 1 km radius overflows the view at the zoom a tag click leaves you at,
+  // so frame the circle rather than drawing it off screen
+  map.fitBounds(lockAreaCircle.getBounds(), {
+    paddingBottomRight: [250, 0],
+    maxZoom: 17,
+    animate: true,
+  })
+}
 
 function clearRoute() {
   if (routeFrame) {
@@ -354,10 +406,12 @@ async function loadMap() {
   const seen = new Set()
   const markersByTag = {}
   const schedulesByTag = {}
+  const locksByTag = {}
 
   await Promise.all(
     locations.map(async (loc) => {
       const locks = await fetchLocks(loc.tag)
+      locksByTag[loc.tag] = locks
       schedulesByTag[loc.tag] = locks.flatMap(lock =>
         lock.schedules.map(s => ({
           ...s,
@@ -410,7 +464,7 @@ async function loadMap() {
         ? schedules.map((s) => {
             return `<div>
       ${daysOfWeek[s.day]} ${s.start_time} - ${s.end_time}
-      <a href="https://www.google.com/maps?q=${s.latitude},${s.longitude}" target="_blank">📍</a>
+      <button type="button" class="schedule-pin" data-lock="${s.lock}" title="Show this lock's area">📍</button>
     </div>`
           }).join('')
         : ''
@@ -448,6 +502,10 @@ async function loadMap() {
       // on the map always belongs to the tag whose panel is open
       if (!alreadyOpen) {
         clearRoute()
+        clearLockArea()
+        sidebar
+          .querySelectorAll('.schedule-pin.active')
+          .forEach(pin => pin.classList.remove('active'))
         status.textContent = ''
       }
 
@@ -456,6 +514,33 @@ async function loadMap() {
         marker.openPopup()
         map.setView(marker.getLatLng(), 17, { animate: true })
       }
+    })
+
+    row.querySelectorAll('.schedule-pin').forEach((pin) => {
+      pin.addEventListener('click', (event) => {
+        // Otherwise the row handler fires too and snaps the view back
+        event.stopPropagation()
+        const lock = (locksByTag[tagId] || []).find(
+          candidate => String(candidate.id) === pin.dataset.lock,
+        )
+        if (!lock)
+          return
+        const wasOpenedByThisPin = pin === lockAreaPin
+        clearLockArea()
+        sidebar
+          .querySelectorAll('.schedule-pin.active')
+          .forEach(other => other.classList.remove('active'))
+
+        // Clicking the pin that opened the area puts it away; any other pin
+        // shows its lock and lights every pin sharing that lock
+        if (!wasOpenedByThisPin) {
+          showLockArea(lock, name, stringToColor(name).hsl)
+          lockAreaPin = pin
+          row
+            .querySelectorAll(`.schedule-pin[data-lock="${pin.dataset.lock}"]`)
+            .forEach(sibling => sibling.classList.add('active'))
+        }
+      })
     })
 
     // The row click zooms to the latest position, which would fight with
