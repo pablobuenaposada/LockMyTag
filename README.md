@@ -16,6 +16,10 @@ The project consists of the following docker containers:
 - `backoffice`: Django application offering an admin interface and REST API.
 - `notifier`: A job that checks geofencing rules and sends notifications when conditions are met.
 
+## 🔑 Adding a tag
+LockMyTag needs the cryptographic keys Apple created when your AirTag was paired.
+Export them with the [OpenTagViewer export wizard](https://github.com/parawanderer/OpenTagViewer/wiki/How-To:-Export-AirTags#the-export-wizard--recommended) (Windows, Linux or macOS), then see [docs/airtag-keys.md](docs/airtag-keys.md) for converting the export and adding the tag to the back office.
+
 ## 🔔 Notifications
 For now notifications are basically a Telegram message sent to a bot that you can create and add to a group with the users you want to receive the notifications.
 
