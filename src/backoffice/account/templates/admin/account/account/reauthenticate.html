@@ -1,0 +1,34 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <div id="content-main">
+    {% if credentials_form %}
+      <p>Sign in with the Apple Account that owns the tags.</p>
+      <form method="post">
+        {% csrf_token %}
+        {{ credentials_form.as_p }}
+        <div class="submit-row">
+          <input type="submit" value="Log in" class="default">
+        </div>
+      </form>
+    {% elif method_form %}
+      <p>Apple wants a second factor. Where should it send the code?</p>
+      <form method="post">
+        {% csrf_token %}
+        {{ method_form.as_p }}
+        <div class="submit-row">
+          <input type="submit" value="Send me a code" class="default">
+        </div>
+      </form>
+    {% else %}
+      <p>Apple sent a code by <strong>{{ sent_by }}</strong>. Type it below.</p>
+      <form method="post">
+        {% csrf_token %}
+        {{ code_form.as_p }}
+        <div class="submit-row">
+          <input type="submit" value="Finish login" class="default">
+        </div>
+      </form>
+    {% endif %}
+  </div>
+{% endblock %}

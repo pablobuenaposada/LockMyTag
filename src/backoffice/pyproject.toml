@@ -12,6 +12,7 @@ dependencies = [
     "django-filter>=25.2",
     "django-simple-history>=3.10.1",
     "djangorestframework>=3.16.1",
+    "findmy>=0.10.2",
     "freezegun>=1.5.5",
     "geopy>=2.4.1",
     "gunicorn>=23.0.0",
