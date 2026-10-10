@@ -52,7 +52,7 @@ function isoDate(date) {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 10)
 }
 
-const map = L.map('map', { maxZoom: 19 })
+const map = L.map('map', { maxZoom: 19, attributionControl: false })
 
 maplibreGL({
   style: 'https://tiles.openfreemap.org/styles/positron',

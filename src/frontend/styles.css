@@ -25,6 +25,12 @@ body {
     sans-serif;
 }
 
+/* Trailing room inside the scrolled content: padding on #sidebar itself is at
+   the end of the scroll box, so the last tag would still sit against the edge */
+#tags-list {
+  padding-bottom: 28px;
+}
+
 #sidebar.hidden {
   display: none;
 }
