@@ -178,13 +178,18 @@ body {
   box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
 }
 
-.login-form h2,
-.login-form p {
-  margin: 0;
+/* Decorative: the heading beside it already names the app, so it is alt="" */
+.login-logo {
+  justify-self: center;
+  /* The artwork sits inside a taller transparent canvas, so the lock itself
+     comes out around 110px */
+  height: 160px;
+  width: auto;
+  margin-bottom: 10px;
 }
 
-.login-form h2 {
-  text-align: center;
+.login-form p {
+  margin: 0;
 }
 
 .login-form input {
