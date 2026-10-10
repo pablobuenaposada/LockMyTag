@@ -81,6 +81,39 @@ body {
 /* The row tint is 20% alpha, which squashes the difference between two tag
    colours to the point of invisibility. This carries the colour at full
    strength so the list is actually readable. */
+/* The emoji is painted in the tag's colour: hiding the glyph and drawing a
+   shadow with no blur or offset leaves its silhouette in whatever colour the
+   shadow is. The blurred white behind it keeps the shape legible over the map. */
+.tag-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  font-size: 31px;
+  line-height: 1;
+  /* Recoloured rather than filled in, so the emoji keeps its own shading:
+     strip its colour, tint it sepia, then rotate that onto the tag's hue.
+     drop-shadow runs last, so its white halo is not tinted with everything else. */
+  filter: grayscale(1) sepia(1) hue-rotate(calc(var(--hue) * 1deg - 40deg))
+    saturate(3) drop-shadow(0 0 2px #fff)
+    drop-shadow(0 1px 1px rgb(0 0 0 / 30%));
+}
+
+.tag-emoji-row {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  margin-right: 6px;
+  font-size: 19px;
+  /* Centred against the name rather than nudged by a fixed offset, which only
+     lines up at one font size */
+  vertical-align: middle;
+  /* No halo needed against the sidebar */
+  filter: grayscale(1) sepia(1) hue-rotate(calc(var(--hue) * 1deg - 40deg))
+    saturate(3);
+}
+
 .tag-dot {
   display: inline-block;
   width: 14px;

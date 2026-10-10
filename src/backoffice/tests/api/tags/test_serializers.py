@@ -16,6 +16,7 @@ class TestsTagOutputSerializer:
         assert self.serializer_class(tag).data == {
             "id": str(tag.id),
             "name": tag.name,
+            "emoji": tag.emoji,
             "master_key": tag.master_key,
             "skn": tag.skn,
             "sks": tag.sks,

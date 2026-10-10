@@ -37,6 +37,20 @@ const PALETTE = [
   '#06b8ef',
 ]
 
+// Tinting an emoji without flattening it works by hue, not by fill, so the
+// palette has to give up the hue of whichever colour a tag drew
+export function tagHue(index) {
+  const hex = tagColor(index)
+  const [r, g, b] = [1, 3, 5].map(i => Number.parseInt(hex.slice(i, i + 2), 16) / 255)
+  const max = Math.max(r, g, b)
+  const span = max - Math.min(r, g, b)
+  if (!span)
+    return 0
+  const sector
+    = max === r ? (g - b) / span : max === g ? (b - r) / span + 2 : (r - g) / span + 4
+  return Math.round((sector * 60 + 360) % 360)
+}
+
 export function tagColor(index) {
   // Past the end of the list colours repeat, which is better than inventing
   // near-duplicates that look like a bug

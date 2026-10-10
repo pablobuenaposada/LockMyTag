@@ -9,9 +9,9 @@ import {
   UnauthorizedError,
 } from './api.js'
 import { batteryIconSvg } from './battery.js'
-import { tagColor } from './colors.js'
+import { tagColor, tagHue } from './colors.js'
 import { daysOfWeek } from './constants.js'
-import { lockIconSvg } from './lock.js'
+import { logoIconSvg } from './logo.js'
 
 function timeSince(dateString) {
   const now = new Date()
@@ -30,16 +30,18 @@ function timeSince(dateString) {
   return `${days} days ago`
 }
 
-function createLockIcon(color) {
-  const coloredSvg = lockIconSvg.replace(
-    /<svg([^>]*)>/,
-    `<svg$1 fill="${color}">`,
-  )
+// A tag shows its own emoji if it has one, otherwise the padlock in its colour
+function createTagIcon(color, hue, emoji) {
+  const html = emoji
+    ? `<span class="tag-emoji" style="--hue:${hue}">${emoji}</span>`
+    : logoIconSvg.replace(/<svg([^>]*)>/, `<svg$1 fill="${color}">`)
   return L.divIcon({
     className: '',
-    html: coloredSvg,
-    iconSize: [30, 30],
-    iconAnchor: [16, 32],
+    html,
+    // Each gets a box its own shape — the logo is portrait, the emoji square —
+    // and both are anchored at the foot so the marker points at the same spot
+    iconSize: emoji ? [38, 38] : [24, 38],
+    iconAnchor: emoji ? [19, 38] : [12, 38],
     popupAnchor: [0, -32],
   })
 }
@@ -379,6 +381,9 @@ async function loadMap() {
   const colorByTag = Object.fromEntries(
     locations.map(loc => [loc.tag, tagColor(loc.colorIndex)]),
   )
+  const hueByTag = Object.fromEntries(
+    locations.map(loc => [loc.tag, tagHue(loc.colorIndex)]),
+  )
 
   await Promise.all(
     locations.map(async (loc) => {
@@ -403,7 +408,7 @@ async function loadMap() {
       lng += (Math.random() - 0.5) * 0.0002
     }
     seen.add(key)
-    const icon = createLockIcon(colorByTag[loc.tag])
+    const icon = createTagIcon(colorByTag[loc.tag], hueByTag[loc.tag], loc.emoji)
     const marker = L.marker([lat, lng], { icon })
       .addTo(map)
       .bindPopup(
@@ -468,7 +473,11 @@ async function loadMap() {
           }).join('')
         : ''
       return `<div class="tag-row" data-tag="${loc.name}" data-tag-id="${loc.tag}" style="background:${colorByTag[loc.tag]}33;">
-        <span class="tag-dot" style="background:${colorByTag[loc.tag]}"></span>${loc.name} ${batteryIconSvg(loc.battery)} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
+        ${
+          loc.emoji
+            ? `<span class="tag-emoji tag-emoji-row" style="--hue:${hueByTag[loc.tag]}">${loc.emoji}</span>`
+            : `<span class="tag-dot" style="background:${colorByTag[loc.tag]}"></span>`
+        }${loc.name} ${batteryIconSvg(loc.battery)} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
         <div class="tag-schedules">${schedulesHtml}
           <div class="tag-schedules-edit"><a href="${window.location.origin}/admin/locks/lock/?tag__name=${loc.name}">edit lock schedules</a></div>
           <div class="tag-route">

@@ -7,7 +7,7 @@ from .models import Tag, TagLocation
 class TagAdmin(admin.ModelAdmin):
     exclude = ("id",)
     readonly_fields = ("created", "modified")
-    list_display = ("id", "name")
+    list_display = ("name", "emoji")
 
 
 class TagLocationAdmin(admin.ModelAdmin):

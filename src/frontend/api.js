@@ -77,6 +77,7 @@ export function fetchLatestLocationsForAllTags() {
             .then(location => ({
               tag: location.tag,
               name: tag.name,
+              emoji: tag.emoji,
               colorIndex: index,
               longitude: location.longitude,
               latitude: location.latitude,

@@ -16,6 +16,7 @@ class TestTag:
         expected = {
             "id": ANY,
             "name": "Test Tag",
+            "emoji": "",
             "master_key": fake.bothify("?" * 28),
             "skn": fake.bothify("?" * 44),
             "sks": fake.bothify("?" * 44),
