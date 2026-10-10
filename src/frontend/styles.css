@@ -40,6 +40,19 @@ body {
   margin-bottom: 12px;
 }
 
+/* The row tint is 20% alpha, which squashes the difference between two tag
+   colours to the point of invisibility. This carries the colour at full
+   strength so the list is actually readable. */
+.tag-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  border-radius: 50%;
+  vertical-align: -2px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 20%);
+}
+
 .battery-icon {
   width: 22px;
   height: 10px;

@@ -65,12 +65,19 @@ export function fetchLatestLocation(uuid) {
 export function fetchLatestLocationsForAllTags() {
   return fetchTags()
     .then((tags) => {
-      const locationPromises = tags.map(
-        tag =>
+      // Colour follows this order, so index by age: a new tag appends rather
+      // than shifting the colour of every tag already on the map. The index is
+      // taken before any fetch can fail, or a 404 would renumber the rest.
+      const oldestFirst = [...tags].sort((a, b) =>
+        a.created.localeCompare(b.created),
+      )
+      const locationPromises = oldestFirst.map(
+        (tag, index) =>
           fetchLatestLocation(tag.id)
             .then(location => ({
               tag: location.tag,
               name: tag.name,
+              colorIndex: index,
               longitude: location.longitude,
               latitude: location.latitude,
               timestamp: location.timestamp,

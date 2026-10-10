@@ -9,6 +9,7 @@ import {
   UnauthorizedError,
 } from './api.js'
 import { batteryIconSvg } from './battery.js'
+import { tagColor } from './colors.js'
 import { daysOfWeek } from './constants.js'
 import { lockIconSvg } from './lock.js'
 
@@ -41,41 +42,6 @@ function createLockIcon(color) {
     iconAnchor: [16, 32],
     popupAnchor: [0, -32],
   })
-}
-
-function murmurhash3(str) {
-  let h = 0x811C9DC5
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i)
-    h = Math.imul(h, 0x01000193)
-    h ^= h >>> 16
-  }
-  return h >>> 0
-}
-
-function hslToHex(h, s, l) {
-  s /= 100
-  l /= 100
-  const k = n => (n + h / 30) % 12
-  const a = s * Math.min(l, 1 - l)
-  const f = n =>
-    l - a * Math.max(-1, Math.min(Math.min(k(n) - 3, 9 - k(n)), 1))
-  const rgb = [
-    Math.round(255 * f(0)),
-    Math.round(255 * f(8)),
-    Math.round(255 * f(4)),
-  ]
-  return `#${rgb.map(x => x.toString(16).padStart(2, '0')).join('')}`
-}
-
-function stringToColor(str) {
-  const hash = murmurhash3(str)
-  const hue = hash % 360
-  const sat = 60 + ((hash >> 8) % 30) // 60-89%
-  const light = 40 + ((hash >> 16) % 20) // 40-59%
-  const hsl = `hsl(${hue}, ${sat}%, ${light}%)`
-  const hex = hslToHex(hue, sat, light)
-  return { hsl, hex }
 }
 
 function isoDate(date) {
@@ -360,7 +326,7 @@ function locationDots(points, color) {
   )
 }
 
-async function showRoute(tag, name, start, end, statusElement) {
+async function showRoute(tag, name, color, start, end, statusElement) {
   statusElement.textContent = 'Loading…'
   let route
   try {
@@ -385,7 +351,6 @@ async function showRoute(tag, name, start, end, statusElement) {
     Number(point.latitude),
     Number(point.longitude),
   ])
-  const color = stringToColor(name).hsl
   const last = points.length - 1
   routeLayer = L.layerGroup([
     ...fadedLine(points, color),
@@ -407,6 +372,9 @@ async function loadMap() {
   const markersByTag = {}
   const schedulesByTag = {}
   const locksByTag = {}
+  const colorByTag = Object.fromEntries(
+    locations.map(loc => [loc.tag, tagColor(loc.colorIndex)]),
+  )
 
   await Promise.all(
     locations.map(async (loc) => {
@@ -431,7 +399,7 @@ async function loadMap() {
       lng += (Math.random() - 0.5) * 0.0002
     }
     seen.add(key)
-    const icon = createLockIcon(stringToColor(loc.name).hsl)
+    const icon = createLockIcon(colorByTag[loc.tag])
     const marker = L.marker([lat, lng], { icon })
       .addTo(map)
       .bindPopup(
@@ -468,8 +436,8 @@ async function loadMap() {
     </div>`
           }).join('')
         : ''
-      return `<div class="tag-row" data-tag="${loc.name}" data-tag-id="${loc.tag}" style="background:${stringToColor(loc.name).hex}33;">
-        ${loc.name} ${batteryIconSvg(loc.battery)} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
+      return `<div class="tag-row" data-tag="${loc.name}" data-tag-id="${loc.tag}" style="background:${colorByTag[loc.tag]}33;">
+        <span class="tag-dot" style="background:${colorByTag[loc.tag]}"></span>${loc.name} ${batteryIconSvg(loc.battery)} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
         <div class="tag-schedules">${schedulesHtml}
           <div class="tag-schedules-edit"><a href="${window.location.origin}/admin/locks/lock/?tag__name=${loc.name}">edit lock schedules</a></div>
           <div class="tag-route">
@@ -534,7 +502,7 @@ async function loadMap() {
         // Clicking the pin that opened the area puts it away; any other pin
         // shows its lock and lights every pin sharing that lock
         if (!wasOpenedByThisPin) {
-          showLockArea(lock, name, stringToColor(name).hsl)
+          showLockArea(lock, name, colorByTag[tagId])
           lockAreaPin = pin
           row
             .querySelectorAll(`.schedule-pin[data-lock="${pin.dataset.lock}"]`)
@@ -551,6 +519,7 @@ async function loadMap() {
       showRoute(
         tagId,
         name,
+        colorByTag[tagId],
         routePanel.querySelector('.route-start').value,
         routePanel.querySelector('.route-end').value,
         status,
