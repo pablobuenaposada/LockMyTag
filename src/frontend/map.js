@@ -192,6 +192,10 @@ const ROUTE_TAIL_FRACTION = 0.07
 const ROUTE_POINT_RADIUS = 3
 const stillPlease = window.matchMedia('(prefers-reduced-motion: reduce)')
 
+function zoomToTag(latLng) {
+  map.setView(latLng, map.getMaxZoom(), { animate: true })
+}
+
 function endpointMarker(latLng, fillColor, name, label, timestamp) {
   return L.circleMarker(latLng, {
     radius: 7,
@@ -408,6 +412,7 @@ async function loadMap() {
            View on Google Maps
          </a>`,
       )
+      .on('click', () => zoomToTag(marker.getLatLng()))
     markersByTag[loc.name] = marker
   })
 
@@ -483,7 +488,7 @@ async function loadMap() {
       const marker = markersByTag[name]
       if (marker) {
         marker.openPopup()
-        map.setView(marker.getLatLng(), 17, { animate: true })
+        zoomToTag(marker.getLatLng())
       }
     })
 
