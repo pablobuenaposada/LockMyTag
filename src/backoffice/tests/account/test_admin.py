@@ -14,6 +14,7 @@ User = get_user_model()
 STORED = {
     "type": "account",
     "account": {"username": "pablo@example.com", "password": "hunter2"},
+    "login": {"state": 3, "data": {}},
 }
 RENEWED = {
     "type": "account",
@@ -174,3 +175,23 @@ class TestsReauthenticate:
         assert response.status_code == status.HTTP_200_OK
         assert "Apple Account" in response.content.decode()
         assert 'value="pablo@example.com"' in response.content.decode()
+
+    def test_the_session_blob_is_not_in_the_admin_form(self):
+        """The data field holds the Apple password, so it is never rendered."""
+        account = baker.make(Account, data=STORED)
+
+        page = self.client.get(
+            resolve_url("admin:account_account_change", account.pk)
+        ).content.decode()
+
+        assert "hunter2" not in page
+        assert 'name="data"' not in page
+
+    def test_the_changelist_summarises_without_secrets(self):
+        baker.make(Account, data=STORED)
+
+        page = self.client.get(self.changelist).content.decode()
+
+        assert "pablo@example.com" in page
+        assert "logged in" in page
+        assert "hunter2" not in page

@@ -37,9 +37,28 @@ class CodeForm(forms.Form):
     )
 
 
+LOGIN_STATES = {
+    0: "logged out",
+    1: "waiting for a code",
+    2: "authenticated",
+    3: "logged in",
+}
+
+
 class AccountAdmin(admin.ModelAdmin):
-    readonly_fields = ("created", "modified")
+    # The session holds the Apple password and the tokens that stand in for it,
+    # so it is never rendered. The button writes it; nothing needs to read it.
+    exclude = ("data",)
+    readonly_fields = ("created", "modified", "session")
+    list_display = ("__str__", "session")
     change_list_template = "admin/account/account/change_list.html"
+
+    @admin.display(description="Apple session")
+    def session(self, obj):
+        data = obj.data or {}
+        who = (data.get("account") or {}).get("username") or "unknown account"
+        state = (data.get("login") or {}).get("state")
+        return f"{who} — {LOGIN_STATES.get(state, state)}"
 
     def get_urls(self):
         return [

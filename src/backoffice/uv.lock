@@ -222,6 +222,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "colorama" },
     { name = "django" },
+    { name = "django-encrypted-model-fields" },
     { name = "django-environ" },
     { name = "django-extensions" },
     { name = "django-filter" },
@@ -249,6 +250,7 @@ tests = [
 requires-dist = [
     { name = "colorama", specifier = ">=0.4.6" },
     { name = "django", specifier = ">=5.2.5" },
+    { name = "django-encrypted-model-fields", specifier = ">=0.6.5" },
     { name = "django-environ", specifier = ">=0.12.0" },
     { name = "django-extensions", specifier = ">=4.1" },
     { name = "django-filter", specifier = ">=25.2" },
@@ -522,6 +524,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/78/29/ac41e16097af67066d97a7d5775c5d8e7efc5d0284f6b0a159e07b9adb92/django-6.0.6.tar.gz", hash = "sha256:ad03916ba59523d781ae5c3f631960c23d69a9d9c43cecda52fc23b47e953713", size = 10905525, upload-time = "2026-06-03T13:02:46.503Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/eb/50/23f9dc45483419a3cc2085b498b25adfbf10642b2941c73e6d2dfaffc9ab/django-6.0.6-py3-none-any.whl", hash = "sha256:25148b1194c47c2e685e5f5e9c5d59c78b075dfd282cb9618861ba6c1708f4d2", size = 8373354, upload-time = "2026-06-03T13:02:41.72Z" },
+]
+
+[[package]]
+name = "django-encrypted-model-fields"
+version = "0.6.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/35/44/e4273d48f406b23604cf946912421583a659044d5e521799d1cfd74222c5/django-encrypted-model-fields-0.6.5.tar.gz", hash = "sha256:8bd21c5565c0d64ec4dbd375ad34fea68b4da2db871dec3fa71fe7b5e4221c99", size = 7259, upload-time = "2022-02-24T22:52:12.415Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e4/36/1b86079a489f181e33bd83600127e7b3b73c66cd609ac672e58de93ed9a9/django_encrypted_model_fields-0.6.5-py3-none-any.whl", hash = "sha256:b21bbdd8ae2e1a0ea37a5049b3ba46e6e63bf287ad241219a058fac1070796cc", size = 8934, upload-time = "2022-02-24T22:52:13.955Z" },
 ]
 
 [[package]]

@@ -20,7 +20,8 @@ class TestsAccountListView:
 
     @pytest.fixture(autouse=True)
     def setup_class(self):
-        User.objects.create_user(username=USERNAME, password=PASSWORD)
+        # The fetcher reads this as a staff user; nobody else should
+        User.objects.create_user(username=USERNAME, password=PASSWORD, is_staff=True)
         self.auth_headers = {
             "HTTP_AUTHORIZATION": f"Basic {base64.b64encode(f'{USERNAME}:{PASSWORD}'.encode('utf-8')).decode('utf-8')}"
         }
@@ -30,6 +31,18 @@ class TestsAccountListView:
 
     def test_missing_authentication(self, client):
         response = client.get(self.endpoint)
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_an_ordinary_user_cannot_read_the_session(self, client):
+        """A map login must not be enough to read the Apple credentials."""
+        User.objects.create_user(username="mapuser", password=PASSWORD)
+        headers = {
+            "HTTP_AUTHORIZATION": f"Basic {base64.b64encode(f'mapuser:{PASSWORD}'.encode('utf-8')).decode('utf-8')}"
+        }
+        baker.make(Account)
+
+        response = client.get(self.endpoint, **headers)
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 

@@ -31,6 +31,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
 
+# Separate from SECRET_KEY: rotating one should not make the other unreadable
+FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", default="")
+
+# model_bakery cannot invent a value for a custom field unless it is told how
+BAKER_CUSTOM_FIELDS_GEN = {"main.fields.EncryptedJSONField": dict}
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=False)
 
