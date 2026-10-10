@@ -416,7 +416,10 @@ async function loadMap() {
     Number(loc.longitude),
   ])
   if (bounds.length) {
-    map.fitBounds(bounds, { paddingBottomRight: [250, 0] })
+    map.fitBounds(bounds, {
+      paddingTopLeft: [60, 60],
+      paddingBottomRight: [310, 60],
+    })
   }
 
   const today = new Date()
