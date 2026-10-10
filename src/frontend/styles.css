@@ -71,6 +71,29 @@ body {
   outline-offset: 2px;
 }
 
+/* The collapsed row is one line: the name gives up its space first, so the
+   battery and the age stay put instead of wrapping onto a second line */
+.tag-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  /* Keeps the overflow measurable, and hides whatever is still too long at the
+     smallest size the text is allowed to reach */
+  overflow: hidden;
+}
+
+/* Nothing gives way on its own: the row is measured and the text scaled down
+   as a whole instead */
+.tag-head > * {
+  flex: none;
+}
+
+.tag-name,
+.tag-time {
+  white-space: nowrap;
+}
+
 .tag-row {
   padding: 12px 16px;
   font-size: 16px;
@@ -104,7 +127,6 @@ body {
   display: inline-flex;
   width: 24px;
   height: 24px;
-  margin-right: 6px;
   font-size: 19px;
   /* Centred against the name rather than nudged by a fixed offset, which only
      lines up at one font size */
@@ -118,7 +140,6 @@ body {
   display: inline-block;
   width: 14px;
   height: 14px;
-  margin-right: 8px;
   border-radius: 50%;
   vertical-align: -2px;
   box-shadow: 0 0 0 1px rgb(0 0 0 / 20%);

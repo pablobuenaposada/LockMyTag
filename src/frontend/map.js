@@ -71,6 +71,22 @@ map.createPane('routeBase')
 map.getPane('routeBase').style.zIndex = 390
 const routeBaseRenderer = L.canvas({ pane: 'routeBase', padding: 0.5 })
 
+// A row that will not fit shrinks its text rather than cutting the name short.
+// Sizing the whole line, not just the name, keeps the name and the age in
+// proportion. CSS cannot size text to its container, so it has to be measured.
+const ROW_MIN_FONT = 9
+
+function fitTagRows() {
+  document.querySelectorAll('.tag-head').forEach((head) => {
+    head.style.fontSize = ''
+    let size = Number.parseFloat(getComputedStyle(head).fontSize)
+    while (head.scrollWidth > head.clientWidth && size > ROW_MIN_FONT) {
+      size -= 0.5
+      head.style.fontSize = `${size}px`
+    }
+  })
+}
+
 const sidebar = document.getElementById('tags-list')
 sidebar.parentElement.classList.add('hidden')
 let loginTemplatePromise
@@ -473,11 +489,11 @@ async function loadMap() {
           }).join('')
         : ''
       return `<div class="tag-row" data-tag="${loc.name}" data-tag-id="${loc.tag}" style="background:${colorByTag[loc.tag]}33;">
-        ${
+        <div class="tag-head">${
           loc.emoji
             ? `<span class="tag-emoji tag-emoji-row" style="--hue:${hueByTag[loc.tag]}">${loc.emoji}</span>`
             : `<span class="tag-dot" style="background:${colorByTag[loc.tag]}"></span>`
-        }${loc.name} ${batteryIconSvg(loc.battery)} <span class="tag-time">(${timeSince(loc.timestamp)})</span>
+        }<span class="tag-name">${loc.name}</span>${batteryIconSvg(loc.battery)}<span class="tag-time">(${timeSince(loc.timestamp)})</span></div>
         <div class="tag-schedules">${schedulesHtml}
           <div class="tag-schedules-edit"><a href="${window.location.origin}/admin/locks/lock/?tag__name=${loc.name}">edit lock schedules</a></div>
           <div class="tag-route">
@@ -573,7 +589,12 @@ async function loadMap() {
   })
 
   sidebar.parentElement.classList.remove('hidden')
+  // Only measurable once the sidebar is on screen and has a width
+  fitTagRows()
 }
+
+// The sidebar is a share of the window, so a resize changes what fits
+window.addEventListener('resize', fitTagRows)
 
 loadMap().catch((error) => {
   if (error instanceof UnauthorizedError) {
