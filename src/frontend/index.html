@@ -19,7 +19,25 @@
   </head>
   <body>
     <div id="sidebar">
-      <h2>Tags</h2>
+      <h2>
+        <button
+          type="button"
+          id="show-all"
+          title="Show every tag and clear the selection"
+        >
+          <svg class="show-all-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path
+              d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Tags
+        </button>
+      </h2>
       <div id="tags-list"></div>
     </div>
     <div id="map">

@@ -33,6 +33,44 @@ body {
   text-align: center;
 }
 
+/* The heading doubles as the reset control. Nobody hovers a title to find out
+   it is clickable, so it has to look like a control while sitting still. */
+#show-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: inherit;
+  padding: 4px 16px;
+  border: 1px solid rgb(0 0 0 / 12%);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 70%);
+  color: inherit;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+#show-all:hover {
+  background: #fff;
+  border-color: rgb(0 0 0 / 28%);
+}
+
+.show-all-icon {
+  width: 15px;
+  height: 15px;
+  opacity: 0.55;
+}
+
+#show-all:hover .show-all-icon {
+  opacity: 0.9;
+}
+
+#show-all:focus-visible {
+  outline: 2px solid #2f6fed;
+  outline-offset: 2px;
+}
+
 .tag-row {
   padding: 12px 16px;
   font-size: 16px;

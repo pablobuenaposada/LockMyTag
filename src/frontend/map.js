@@ -420,12 +420,35 @@ async function loadMap() {
     Number(loc.latitude),
     Number(loc.longitude),
   ])
-  if (bounds.length) {
+  // The opening view and the reset button must agree, so there is one of it
+  function showAllTags() {
+    if (!bounds.length)
+      return
     map.fitBounds(bounds, {
       paddingTopLeft: [60, 60],
       paddingBottomRight: [310, 60],
     })
   }
+
+  // Back to how the map opened: every tag in view, nothing selected
+  function resetView() {
+    clearRoute()
+    clearLockArea()
+    map.closePopup()
+    sidebar
+      .querySelectorAll('.tag-schedules.visible')
+      .forEach(panel => panel.classList.remove('visible'))
+    sidebar
+      .querySelectorAll('.schedule-pin.active')
+      .forEach(pin => pin.classList.remove('active'))
+    sidebar.querySelectorAll('.route-status').forEach((status) => {
+      status.textContent = ''
+    })
+    showAllTags()
+  }
+
+  document.getElementById('show-all').addEventListener('click', resetView)
+  showAllTags()
 
   const today = new Date()
   const defaultEnd = isoDate(today)
