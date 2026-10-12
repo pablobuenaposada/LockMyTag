@@ -10,6 +10,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "dependencies": {
+    "@maplibre/maplibre-gl-leaflet": "^0.1.4",
+    "leaflet": "^1.9.4",
+    "maplibre-gl": "^6.8.0"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^6.1.0",
     "@eslint/css": "^0.13.0",

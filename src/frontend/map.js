@@ -13,6 +13,19 @@ import { tagColor, tagHue } from './colors.js'
 import { daysOfWeek } from './constants.js'
 import { logoIconSvg } from './logo.js'
 
+// Rows and popups are built as HTML strings, and a tag's name and emoji come
+// from the database, so anything going into one has to be escaped first
+const ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, character => ESCAPES[character])
+}
+
+// 21:00:00 -> 21:00
+function withoutSeconds(time) {
+  return time.slice(0, 5)
+}
+
 function timeSince(dateString) {
   const now = new Date()
   const date = new Date(dateString)
@@ -33,7 +46,7 @@ function timeSince(dateString) {
 // A tag shows its own emoji if it has one, otherwise the padlock in its colour
 function createTagIcon(color, hue, emoji) {
   const html = emoji
-    ? `<span class="tag-emoji" style="--hue:${hue}">${emoji}</span>`
+    ? `<span class="tag-emoji" style="--hue:${hue}">${escapeHtml(emoji)}</span>`
     : logoIconSvg.replace(/<svg([^>]*)>/, `<svg$1 fill="${color}">`)
   return L.divIcon({
     className: '',
@@ -71,20 +84,21 @@ map.createPane('routeBase')
 map.getPane('routeBase').style.zIndex = 390
 const routeBaseRenderer = L.canvas({ pane: 'routeBase', padding: 0.5 })
 
-// A row that will not fit shrinks its text rather than cutting the name short.
-// Sizing the whole line, not just the name, keeps the name and the age in
-// proportion. CSS cannot size text to its container, so it has to be measured.
+// A line that will not fit shrinks its text rather than being cut short. CSS
+// cannot size text to its container, so it has to be measured.
 const ROW_MIN_FONT = 9
 
+function shrinkToFit(line) {
+  line.style.fontSize = ''
+  let size = Number.parseFloat(getComputedStyle(line).fontSize)
+  while (line.scrollWidth > line.clientWidth && size > ROW_MIN_FONT) {
+    size -= 0.5
+    line.style.fontSize = `${size}px`
+  }
+}
+
 function fitTagRows() {
-  document.querySelectorAll('.tag-head').forEach((head) => {
-    head.style.fontSize = ''
-    let size = Number.parseFloat(getComputedStyle(head).fontSize)
-    while (head.scrollWidth > head.clientWidth && size > ROW_MIN_FONT) {
-      size -= 0.5
-      head.style.fontSize = `${size}px`
-    }
-  })
+  document.querySelectorAll('.tag-head, .tag-schedule').forEach(shrinkToFit)
 }
 
 const sidebar = document.getElementById('tags-list')
@@ -163,7 +177,11 @@ function showLockArea(lock, name, color) {
   const when = lock.schedules
     .slice()
     .sort((a, b) => a.day - b.day || a.start_time.localeCompare(b.start_time))
-    .map(s => `${daysOfWeek[s.day]} ${s.start_time} - ${s.end_time}`)
+    .map(s =>
+      escapeHtml(
+        `${daysOfWeek[s.day]} ${withoutSeconds(s.start_time)} - ${withoutSeconds(s.end_time)}`,
+      ),
+    )
     .join('<br>')
 
   lockAreaCircle = L.circle([lock.latitude, lock.longitude], {
@@ -177,7 +195,7 @@ function showLockArea(lock, name, color) {
     fillOpacity: 0.1,
   })
     .bindPopup(
-      `<b>${name}</b><br>Lock area · ${lock.radius} m<br>${when}<br>`
+      `<b>${escapeHtml(name)}</b><br>Lock area · ${escapeHtml(lock.radius)} m<br>${when}<br>`
       + `<a href="https://www.google.com/maps?q=${lock.latitude},${lock.longitude}" target="_blank">View on Google Maps</a>`,
     )
     .addTo(map)
@@ -221,7 +239,9 @@ function endpointMarker(latLng, fillColor, name, label, timestamp) {
     weight: 2,
     fillColor,
     fillOpacity: 1,
-  }).bindPopup(`<b>${name}</b><br>${label}<br>${timestamp}`)
+  }).bindPopup(
+    `<b>${escapeHtml(name)}</b><br>${escapeHtml(label)}<br>${escapeHtml(timestamp)}`,
+  )
 }
 
 function distancesAlong(points) {
@@ -428,7 +448,7 @@ async function loadMap() {
     const marker = L.marker([lat, lng], { icon })
       .addTo(map)
       .bindPopup(
-        `<b>${loc.name}</b><br>${loc.timestamp}<br>
+        `<b>${escapeHtml(loc.name)}</b><br>${escapeHtml(loc.timestamp)}<br>
          <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank">
            View on Google Maps
          </a>`,
@@ -482,20 +502,20 @@ async function loadMap() {
       )
       const schedulesHtml = schedules.length
         ? schedules.map((s) => {
-            return `<div>
-      ${daysOfWeek[s.day]} ${s.start_time} - ${s.end_time}
+            return `<div class="tag-schedule">
+      <span>${escapeHtml(`${daysOfWeek[s.day]} ${withoutSeconds(s.start_time)} - ${withoutSeconds(s.end_time)}`)}</span>
       <button type="button" class="schedule-pin" data-lock="${s.lock}" title="Show this lock's area">📍</button>
     </div>`
           }).join('')
         : ''
-      return `<div class="tag-row" data-tag="${loc.name}" data-tag-id="${loc.tag}" style="background:${colorByTag[loc.tag]}33;">
+      return `<div class="tag-row" data-tag="${escapeHtml(loc.name)}" data-tag-id="${escapeHtml(loc.tag)}" style="background:${colorByTag[loc.tag]}33;">
         <div class="tag-head">${
           loc.emoji
-            ? `<span class="tag-emoji tag-emoji-row" style="--hue:${hueByTag[loc.tag]}">${loc.emoji}</span>`
+            ? `<span class="tag-emoji tag-emoji-row" style="--hue:${hueByTag[loc.tag]}">${escapeHtml(loc.emoji)}</span>`
             : `<span class="tag-dot" style="background:${colorByTag[loc.tag]}"></span>`
-        }<span class="tag-name">${loc.name}</span>${batteryIconSvg(loc.battery)}<span class="tag-time">(${timeSince(loc.timestamp)})</span></div>
+        }<span class="tag-name">${escapeHtml(loc.name)}</span>${batteryIconSvg(loc.battery)}<span class="tag-time">(${timeSince(loc.timestamp)})</span></div>
         <div class="tag-schedules">${schedulesHtml}
-          <div class="tag-schedules-edit"><a href="${window.location.origin}/admin/locks/lock/?tag__name=${loc.name}">edit lock schedules</a></div>
+          <div class="tag-schedules-edit"><a href="${window.location.origin}/admin/locks/lock/?tag__name=${encodeURIComponent(loc.name)}">edit lock schedules</a></div>
           <div class="tag-route">
             <div class="tag-route-title">Past route</div>
             <label>from <input type="date" class="route-start" value="${defaultStart}" max="${defaultEnd}"></label>

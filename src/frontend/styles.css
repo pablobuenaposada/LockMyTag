@@ -2,6 +2,9 @@ body {
   margin: 0;
   height: 100vh;
   position: relative;
+  /* The sidebar is the only thing that scrolls. Without this the page itself
+     can scroll past the map and show a strip of nothing underneath it. */
+  overflow: hidden;
 }
 
 #map {
@@ -17,8 +20,9 @@ body {
   height: 100vh;
   background: rgb(248 249 250 / 60%);
   border-left: 1px solid #ddd;
-  padding: 16px;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   z-index: 1000;
   font-family:
     San Francisco,
@@ -27,15 +31,29 @@ body {
 
 /* Trailing room inside the scrolled content: padding on #sidebar itself is at
    the end of the scroll box, so the last tag would still sit against the edge */
+/* The only thing that scrolls */
 #tags-list {
-  padding-bottom: 28px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  /* Reaching the end of the list must not hand the scroll to the page */
+  overscroll-behavior: contain;
+  padding: 14px 16px 28px;
 }
 
 #sidebar.hidden {
   display: none;
 }
 
+/* Outside the scrolling area rather than floating above it, so no row ever
+   passes behind it and it can stay as see-through as the sidebar itself */
+#sidebar-top {
+  flex: none;
+  padding: 14px 16px;
+}
+
 #sidebar h2 {
+  margin: 0;
   text-align: center;
 }
 
@@ -177,6 +195,17 @@ body {
   padding-top: 5%;
   max-height: 800px;
   opacity: 1;
+}
+
+/* One schedule, one line. nowrap is what makes the line overflow rather than
+   wrap, which is how the fitting code detects that it has to shrink. */
+.tag-schedule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .schedule-pin {

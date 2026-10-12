@@ -1,17 +1,14 @@
 <html>
   <head>
     <title>LockMyTag</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/maplibre-gl@6.8.0/dist/maplibre-gl.css"
-    />
+    <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="vendor/maplibre-gl/maplibre-gl.css" />
     <script type="importmap">
       {
         "imports": {
-          "leaflet": "https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js",
-          "maplibre-gl": "https://unpkg.com/maplibre-gl@6.8.0/dist/maplibre-gl.mjs",
-          "@maplibre/maplibre-gl-leaflet": "https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/dist/leaflet-maplibre-gl.mjs"
+          "leaflet": "./vendor/leaflet/leaflet-src.esm.js",
+          "maplibre-gl": "./vendor/maplibre-gl/maplibre-gl.js",
+          "@maplibre/maplibre-gl-leaflet": "./vendor/maplibre-gl-leaflet/leaflet-maplibre-gl.js"
         }
       }
     </script>
@@ -20,25 +17,27 @@
   </head>
   <body>
     <div id="sidebar">
-      <h2>
-        <button
-          type="button"
-          id="show-all"
-          title="Show every tag and clear the selection"
-        >
-          <svg class="show-all-icon" viewBox="0 0 16 16" aria-hidden="true">
-            <path
-              d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          Tags
-        </button>
-      </h2>
+      <div id="sidebar-top">
+        <h2>
+          <button
+            type="button"
+            id="show-all"
+            title="Show every tag and clear the selection"
+          >
+            <svg class="show-all-icon" viewBox="0 0 16 16" aria-hidden="true">
+              <path
+                d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Tags
+          </button>
+        </h2>
+      </div>
       <div id="tags-list"></div>
     </div>
     <div id="map">
