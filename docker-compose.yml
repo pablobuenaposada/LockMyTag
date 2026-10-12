@@ -94,7 +94,9 @@ services:
   fetcher:
     build: ./src/fetcher/.
     environment:
-      API_URL: ${API_URL}
+      # Straight to the app rather than through nginx, which refuses
+      # /api/account/ so the Apple session is not reachable from outside
+      API_URL: http://backoffice:8000
       API_USERNAME: ${API_USERNAME}
       API_PASSWORD: ${API_PASSWORD}
       SLEEP_SECONDS: ${SLEEP_SECONDS}
