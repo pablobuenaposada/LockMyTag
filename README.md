@@ -31,11 +31,11 @@ For now notifications are basically a Telegram message sent to a bot that you ca
 ## 🛠 Development setup
 Spin up all containers:
 ```bash
-make docker/up
+just up
 ```
 Now let's create a admin user with username `admin` and password `admin`:
 ```bash
-make docker/create-super-user
+just create-super-user
 ```
 Then you can access the back office at `http://localhost/admin/` with the previous credentials.  
 And the frontend at `http://localhost/` (after being logged in the back office).
