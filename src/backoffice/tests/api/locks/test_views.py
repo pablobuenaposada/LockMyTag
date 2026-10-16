@@ -22,7 +22,7 @@ class TestsLockListByTagView:
     @pytest.fixture(autouse=True)
     def setup_class(self):
         self.tag = baker.make(Tag)
-        User.objects.create_user(username=USERNAME, password=PASSWORD)
+        User.objects.create_superuser(username=USERNAME, password=PASSWORD)
         self.auth_headers = {
             "HTTP_AUTHORIZATION": f"Basic {base64.b64encode(f'{USERNAME}:{PASSWORD}'.encode('utf-8')).decode('utf-8')}"
         }

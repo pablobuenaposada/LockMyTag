@@ -33,7 +33,7 @@ class TestsTagLocationCreateView:
         self.hash = fake.random_int()
         self.timestamp = fake.date_time()
         self.tag = baker.make(Tag)
-        User.objects.create_user(username=USERNAME, password=PASSWORD)
+        User.objects.create_superuser(username=USERNAME, password=PASSWORD)
         self.auth_headers = {
             "HTTP_AUTHORIZATION": f"Basic {base64.b64encode(f'{USERNAME}:{PASSWORD}'.encode('utf-8')).decode('utf-8')}"
         }
@@ -75,7 +75,7 @@ class TestsLatestTagLocationView:
         self.hash = fake.random_int()
         self.timestamp = fake.date_time()
         self.tag = baker.make(Tag)
-        User.objects.create_user(username=USERNAME, password=PASSWORD)
+        User.objects.create_superuser(username=USERNAME, password=PASSWORD)
         self.auth_headers = {
             "HTTP_AUTHORIZATION": f"Basic {base64.b64encode(f'{USERNAME}:{PASSWORD}'.encode('utf-8')).decode('utf-8')}"
         }
@@ -117,7 +117,7 @@ class TestsTagLocationRouteView:
     @pytest.fixture(autouse=True)
     def setup_class(self):
         self.tag = baker.make(Tag)
-        User.objects.create_user(username=USERNAME, password=PASSWORD)
+        User.objects.create_superuser(username=USERNAME, password=PASSWORD)
         self.auth_headers = {
             "HTTP_AUTHORIZATION": f"Basic {base64.b64encode(f'{USERNAME}:{PASSWORD}'.encode('utf-8')).decode('utf-8')}"
         }

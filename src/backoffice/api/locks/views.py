@@ -16,6 +16,6 @@ class LockListByTagView(generics.ListAPIView):
         tag_id = self.kwargs.get("tag_id")
         if not tag_id:
             raise NotFound()
-        if not Tag.objects.filter(id=tag_id).exists():
+        if not Tag.objects.visible_to(self.request.user).filter(id=tag_id).exists():
             raise NotFound()
         return Lock.objects.filter(tag__id=tag_id)

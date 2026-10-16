@@ -1,10 +1,19 @@
 import uuid
 
+from django.conf import settings
 from django.core.validators import MinLengthValidator
 from django.db import models
 from django_extensions.db.models import TimeStampedModel
 
 from locations.validators import validate_empty
+
+
+class TagQuerySet(models.QuerySet):
+    def visible_to(self, user):
+        """Tags a user is allowed to see. Superusers see everything."""
+        if user.is_superuser:
+            return self
+        return self.filter(viewers=user)
 
 
 class Tag(TimeStampedModel):
@@ -17,6 +26,14 @@ class Tag(TimeStampedModel):
     skn = models.CharField(max_length=44, validators=[MinLengthValidator(44)])
     sks = models.CharField(max_length=44, validators=[MinLengthValidator(44)])
     paired_at = models.DateTimeField()
+    viewers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        related_name="visible_tags",
+        help_text="Users allowed to see this tag on the map",
+    )
+
+    objects = TagQuerySet.as_manager()
 
     def __str__(self):
         return f"Tag {self.name} {self.id}"

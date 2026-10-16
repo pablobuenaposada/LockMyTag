@@ -17,6 +17,7 @@ class TestsTagOutputSerializer:
             "id": str(tag.id),
             "name": tag.name,
             "emoji": tag.emoji,
+            "viewers": [],
             "master_key": tag.master_key,
             "skn": tag.skn,
             "sks": tag.sks,

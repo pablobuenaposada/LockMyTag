@@ -7,7 +7,16 @@ from .models import Tag, TagLocation
 class TagAdmin(admin.ModelAdmin):
     exclude = ("id",)
     readonly_fields = ("created", "modified")
-    list_display = ("name", "emoji")
+    list_display = ("name", "emoji", "who_can_see")
+    filter_horizontal = ("viewers",)
+
+    @admin.display(description="shared with")
+    def who_can_see(self, obj):
+        names = [user.username for user in obj.viewers.all()]
+        return ", ".join(names) if names else "—"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("viewers")
 
 
 class TagLocationAdmin(admin.ModelAdmin):

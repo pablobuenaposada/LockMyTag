@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 from rest_framework import generics
 from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from api.locations.serializers import TagLocationRouteSerializer, TagLocationSerializer
@@ -13,6 +14,9 @@ ROUTE_MAX_POINTS = 10000
 
 
 class TagLocationCreateView(generics.CreateAPIView):
+    # Only the fetcher writes locations; a map user must not be able to
+    # invent them
+    permission_classes = [IsAdminUser]
     queryset = TagLocation.objects.all()
     serializer_class = TagLocationSerializer
 
@@ -21,6 +25,9 @@ class LatestTagLocationView(generics.GenericAPIView):
     serializer_class = TagLocationSerializer
 
     def get(self, request, tag_id):
+        if not Tag.objects.visible_to(request.user).filter(id=tag_id).exists():
+            raise NotFound()
+
         if not (
             latest_location := TagLocation.objects.filter(tag_id=tag_id)
             .order_by("-timestamp")
@@ -50,7 +57,7 @@ class TagLocationRouteView(generics.GenericAPIView):
         return parsed if timezone.is_aware(parsed) else timezone.make_aware(parsed)
 
     def get(self, request, tag_id):
-        if not Tag.objects.filter(id=tag_id).exists():
+        if not Tag.objects.visible_to(request.user).filter(id=tag_id).exists():
             raise NotFound()
 
         start = self._parse_bound(
