@@ -72,7 +72,19 @@ while True:
             identifier=None,
         )
 
-        if not (report := account.fetch_location(accessory)):
+        try:
+            report = account.fetch_location(accessory)
+        except TimeoutError:
+            # findmy allows Apple 5 seconds a request. Missing a slow one costs a
+            # single report; the next pass asks again. Anything else is not
+            # routine, so it is left to end the run and restart the container.
+            logger.warning(
+                f"{Fore.LIGHTYELLOW_EX}Apple timed out for {tag['name']}, "
+                f"trying again next pass{Fore.RESET}"
+            )
+            continue
+
+        if not report:
             logger.info(
                 f"{Fore.LIGHTYELLOW_EX}No location found for tag {tag['name']}{Fore.RESET}"
             )
