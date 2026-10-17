@@ -6,6 +6,7 @@ import time
 import requests
 from colorama import Fore
 from findmy import FindMyAccessory
+from findmy.errors import UnhandledProtocolError
 
 from apple.account import login
 from constants import (
@@ -74,13 +75,13 @@ while True:
 
         try:
             report = account.fetch_location(accessory)
-        except TimeoutError:
-            # findmy allows Apple 5 seconds a request. Missing a slow one costs a
-            # single report; the next pass asks again. Anything else is not
-            # routine, so it is left to end the run and restart the container.
+        except (TimeoutError, UnhandledProtocolError) as error:
+            # One slow or unusable answer from Apple says nothing about the
+            # next tag, and the next pass asks again. Anything else, the
+            # account included, still ends the run.
             logger.warning(
-                f"{Fore.LIGHTYELLOW_EX}Apple timed out for {tag['name']}, "
-                f"trying again next pass{Fore.RESET}"
+                f"{Fore.LIGHTYELLOW_EX}Could not read {tag['name']}: "
+                f"{type(error).__name__}: {error}{Fore.RESET}"
             )
             continue
 
