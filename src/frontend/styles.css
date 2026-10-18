@@ -16,7 +16,9 @@ body {
   position: absolute;
   top: 0;
   right: 0;
-  width: 15%;
+  /* 15% leaves a tablet like the iPad mini with a column too narrow for the
+     route dates, so it never goes below what those need */
+  width: max(15%, 260px);
   height: 100vh;
   background: rgb(248 249 250 / 60%);
   border-left: 1px solid #ddd;
@@ -302,6 +304,7 @@ body {
 }
 
 .tag-route {
+  container-type: inline-size;
   display: grid;
   gap: 6px;
   padding-top: 10px;
@@ -328,12 +331,24 @@ body {
 }
 
 .tag-route input[type="date"] {
+  box-sizing: border-box;
   width: 100%;
+  /* Date inputs have a wide intrinsic size, Safari's especially, which would
+     otherwise push them out of the sidebar instead of shrinking */
+  min-width: 0;
   padding: 4px 6px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 13px;
   background: #fff;
+}
+
+/* Too narrow for the label beside the date: put it above instead */
+@container (max-width: 200px) {
+  .tag-route label {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
 }
 
 .tag-route-buttons {
