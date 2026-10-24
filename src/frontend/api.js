@@ -37,14 +37,20 @@ export async function setCredentials(username, password) {
     throw new Error('Login failed')
 }
 
-export function clearCredentials() {
-  // Simply navigate away — the session cookie will expire on its own,
-  // or we could call a logout endpoint if added later.
-  document.cookie = 'sessionid=; Max-Age=0; path=/'
+export async function logout() {
+  // The session cookie is HttpOnly, so only the server can end the session
+  const csrfToken = await getCsrfToken()
+  const response = await fetch(`${window.location.origin}/api/account/logout/`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'X-CSRFToken': csrfToken },
+  })
+  if (!response.ok)
+    throw new Error('Logout failed')
 }
 
 async function getCsrfToken() {
-  // Django sets csrftoken cookie on any GET request to a Django view
+  // The login endpoint's GET hands out the csrftoken cookie
   await fetch(`${window.location.origin}/api/account/login/`, {
     method: 'GET',
     credentials: 'same-origin',

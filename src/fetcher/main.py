@@ -13,11 +13,10 @@ from constants import (
     ACCOUNT_ENDPOINT,
     BATTERY_LEVEL,
     LOCATIONS_ENDPOINT,
-    PASSWORD,
     SLEEP_SECONDS,
     TAGS_ENDPOINT,
     TAGS_REFRESH_SECONDS,
-    USERNAME,
+    TOKEN,
 )
 
 logging.basicConfig(
@@ -26,9 +25,12 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+api = requests.Session()
+api.headers["Authorization"] = f"Bearer {TOKEN}"
+
 
 def fetch_account_and_login():
-    account_response = requests.get(ACCOUNT_ENDPOINT, auth=(USERNAME, PASSWORD))
+    account_response = api.get(ACCOUNT_ENDPOINT)
     account_response.raise_for_status()
     if not account_response.json():
         logger.error(f"{Fore.RED}No apple account found, exiting...{Fore.RESET}")
@@ -37,7 +39,7 @@ def fetch_account_and_login():
 
 
 def fetch_tags():
-    tags_response = requests.get(TAGS_ENDPOINT, auth=(USERNAME, PASSWORD))
+    tags_response = api.get(TAGS_ENDPOINT)
     tags_response.raise_for_status()
     tags = tags_response.json()
     if not tags:
@@ -92,7 +94,7 @@ while True:
             continue
 
         logger.info(f"{Fore.MAGENTA}Found report for {tag['name']}{Fore.RESET}")
-        response = requests.post(
+        response = api.post(
             LOCATIONS_ENDPOINT,
             json={
                 "tag": tag["id"],
@@ -101,7 +103,6 @@ while True:
                 "timestamp": report.timestamp.isoformat(),
                 "battery": get_battery_level(report.status),
             },
-            auth=(USERNAME, PASSWORD),
         )
 
         try:

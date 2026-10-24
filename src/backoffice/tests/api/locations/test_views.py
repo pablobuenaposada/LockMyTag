@@ -33,10 +33,6 @@ class TestsTagLocationCreateView:
         self.hash = fake.random_int()
         self.timestamp = fake.date_time()
         self.tag = baker.make(Tag)
-        User.objects.create_superuser(username=USERNAME, password=PASSWORD)
-        self.auth_headers = {
-            "HTTP_AUTHORIZATION": f"Basic {base64.b64encode(f'{USERNAME}:{PASSWORD}'.encode('utf-8')).decode('utf-8')}"
-        }
 
     def test_url(self):
         assert self.endpoint == "/api/locations/"
@@ -44,9 +40,20 @@ class TestsTagLocationCreateView:
     def test_missing_authentication(self, client):
         response = client.post(self.endpoint)
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_success(self, client):
+    def test_not_even_a_superuser_can_write_locations(self, client):
+        User.objects.create_superuser(username=USERNAME, password=PASSWORD)
+        response = client.post(
+            self.endpoint,
+            {"tag": str(self.tag.id)},
+            HTTP_AUTHORIZATION=f"Basic {base64.b64encode(f'{USERNAME}:{PASSWORD}'.encode()).decode()}",
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert not TagLocation.objects.exists()
+
+    def test_success(self, client, fetcher_headers):
         assert not TagLocation.objects.exists()
         response = client.post(
             self.endpoint,
@@ -57,7 +64,7 @@ class TestsTagLocationCreateView:
                 "longitude": self.longitude,
                 "timestamp": self.timestamp,
             },
-            **self.auth_headers,
+            **fetcher_headers,
         )
 
         assert response.status_code == status.HTTP_201_CREATED

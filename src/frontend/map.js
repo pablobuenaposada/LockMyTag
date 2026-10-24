@@ -1,10 +1,10 @@
 import { maplibreGL } from '@maplibre/maplibre-gl-leaflet'
 import * as L from 'leaflet'
 import {
-  clearCredentials,
   fetchLatestLocationsForAllTags,
   fetchLocks,
   fetchRoute,
+  logout,
   setCredentials,
   UnauthorizedError,
 } from './api.js'
@@ -144,7 +144,8 @@ async function showLoginPage() {
       loginPage.remove()
     }
     catch (error) {
-      clearCredentials()
+      // Logged in but the map would not load: do not leave a session behind
+      logout().catch(() => {})
       loginError.textContent
         = error instanceof UnauthorizedError
           ? 'Invalid username or password. Please try again.'
@@ -489,6 +490,17 @@ async function loadMap() {
   }
 
   document.getElementById('show-all').addEventListener('click', resetView)
+  document.getElementById('logout').addEventListener('click', async () => {
+    try {
+      await logout()
+    }
+    catch {
+      return // still logged in, so stay on the map
+    }
+    // Starting over is the simplest way to drop every tag, marker and timer
+    // the session loaded; with no session the page lands on the login form
+    window.location.reload()
+  })
   showAllTags()
 
   const today = new Date()

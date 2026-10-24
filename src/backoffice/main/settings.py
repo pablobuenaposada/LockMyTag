@@ -34,6 +34,9 @@ SECRET_KEY = env("SECRET_KEY")
 # Separate from SECRET_KEY: rotating one should not make the other unreadable
 FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", default="")
 
+# Shared with the fetcher. Empty means the fetcher's endpoints refuse everyone.
+FETCHER_TOKEN = env("FETCHER_TOKEN", default="")
+
 # model_bakery cannot invent a value for a custom field unless it is told how
 BAKER_CUSTOM_FIELDS_GEN = {"main.fields.EncryptedJSONField": dict}
 

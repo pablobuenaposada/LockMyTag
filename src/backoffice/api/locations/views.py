@@ -4,9 +4,9 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 from rest_framework import generics
 from rest_framework.exceptions import NotFound, ValidationError
-from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
+from api.fetcher import FetcherAuthentication, IsFetcher
 from api.locations.serializers import TagLocationRouteSerializer, TagLocationSerializer
 from locations.models import Tag, TagLocation
 
@@ -16,7 +16,8 @@ ROUTE_MAX_POINTS = 10000
 class TagLocationCreateView(generics.CreateAPIView):
     # Only the fetcher writes locations; a map user must not be able to
     # invent them
-    permission_classes = [IsAdminUser]
+    authentication_classes = [FetcherAuthentication]
+    permission_classes = [IsFetcher]
     queryset = TagLocation.objects.all()
     serializer_class = TagLocationSerializer
 

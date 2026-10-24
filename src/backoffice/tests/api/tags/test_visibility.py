@@ -45,10 +45,16 @@ class TestsTagVisibility:
 
         assert set(response.data[0]) == {"id", "name", "emoji", "created"}
 
-    def test_the_fetcher_still_gets_the_keys(self, client):
+    def test_not_even_the_owner_is_given_the_keys(self, client):
         response = client.get(resolve_url("api:tags-list"), **auth("owner"))
 
-        assert "master_key" in response.data[0]
+        assert "master_key" not in response.data[0]
+
+    def test_the_fetcher_sees_every_tag_with_its_keys(self, client, fetcher_headers):
+        response = client.get(resolve_url("api:tags-list"), **fetcher_headers)
+
+        assert {tag["name"] for tag in response.data} == {"shared", "private"}
+        assert all("master_key" in tag for tag in response.data)
 
     def test_latest_location_of_a_tag_not_shared(self, client):
         baker.make(TagLocation, tag=self.private)
@@ -97,7 +103,7 @@ class TestsTagVisibility:
             **auth("guest"),
         )
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
         assert not TagLocation.objects.exists()
 
     def test_a_viewer_cannot_reach_the_admin(self, client):

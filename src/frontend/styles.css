@@ -52,6 +52,49 @@ body {
 #sidebar-top {
   flex: none;
   padding: 14px 16px;
+  /* Anchors the logout button without pushing the heading off centre */
+  position: relative;
+}
+
+/* Small and in the corner: it is used once a session, not every visit */
+#logout {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  display: flex;
+  padding: 6px;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: none;
+  color: #555;
+  cursor: pointer;
+}
+
+#logout:hover {
+  background: rgb(255 255 255 / 70%);
+  border-color: rgb(0 0 0 / 12%);
+  color: #b00020;
+}
+
+#logout:focus-visible {
+  outline: 2px solid #2f6fed;
+  outline-offset: 2px;
+}
+
+.logout-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Read out by screen readers, never drawn */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 #sidebar h2 {
