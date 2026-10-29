@@ -15,7 +15,13 @@ import { logoIconSvg } from './logo.js'
 
 // Rows and popups are built as HTML strings, and a tag's name and emoji come
 // from the database, so anything going into one has to be escaped first
-const ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }
+const ESCAPES = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  '\'': '&#39;',
+}
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, character => ESCAPES[character])
@@ -24,6 +30,17 @@ function escapeHtml(value) {
 // 21:00:00 -> 21:00
 function withoutSeconds(time) {
   return time.slice(0, 5)
+}
+
+// The API sends ISO timestamps with an offset; show them in the browser's own
+// time zone and locale, e.g. 29 Oct 2026, 14:05:09
+const localTimeFormat = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'medium',
+  timeStyle: 'medium',
+})
+
+function localTime(dateString) {
+  return localTimeFormat.format(new Date(dateString))
 }
 
 function timeSince(dateString) {
@@ -75,7 +92,10 @@ maplibreGL({
 }).addTo(map)
 
 // Show entire world map
-map.fitBounds([[-85, -180], [85, 180]])
+map.fitBounds([
+  [-85, -180],
+  [85, 180],
+])
 
 map.createPane('lockArea')
 map.getPane('lockArea').style.zIndex = 380
@@ -107,12 +127,13 @@ let loginTemplatePromise
 
 function loadLoginTemplate() {
   if (!loginTemplatePromise) {
-    loginTemplatePromise = fetch(`${window.location.origin}/login.html`)
-      .then((response) => {
+    loginTemplatePromise = fetch(`${window.location.origin}/login.html`).then(
+      (response) => {
         if (!response.ok)
           throw new Error('Could not load login template')
         return response.text()
-      })
+      },
+    )
   }
   return loginTemplatePromise
 }
@@ -241,7 +262,7 @@ function endpointMarker(latLng, fillColor, name, label, timestamp) {
     fillColor,
     fillOpacity: 1,
   }).bindPopup(
-    `<b>${escapeHtml(name)}</b><br>${escapeHtml(label)}<br>${escapeHtml(timestamp)}`,
+    `<b>${escapeHtml(name)}</b><br>${escapeHtml(label)}<br>${escapeHtml(localTime(timestamp))}`,
   )
 }
 
@@ -333,7 +354,10 @@ function runningDot(points, color) {
 function fadedLine(points, color) {
   // Oldest stretch faint, newest solid, so time still reads in a screenshot,
   // where the running dot shows as nothing at all
-  const size = Math.max(1, Math.ceil((points.length - 1) / ROUTE_FADE_SEGMENTS))
+  const size = Math.max(
+    1,
+    Math.ceil((points.length - 1) / ROUTE_FADE_SEGMENTS),
+  )
   const lines = []
   for (let start = 0; start < points.length - 1; start += size) {
     const progress = start / (points.length - 1)
@@ -399,8 +423,20 @@ async function showRoute(tag, name, color, start, end, statusElement) {
     ...fadedLine(points, color),
     ...locationDots(points, color),
     ...runningDot(points, color),
-    endpointMarker(points[0], '#16a34a', name, 'Start', route.points[0].timestamp),
-    endpointMarker(points[last], '#dc2626', name, 'End', route.points[last].timestamp),
+    endpointMarker(
+      points[0],
+      '#16a34a',
+      name,
+      'Start',
+      route.points[0].timestamp,
+    ),
+    endpointMarker(
+      points[last],
+      '#dc2626',
+      name,
+      'End',
+      route.points[last].timestamp,
+    ),
   ]).addTo(map)
   map.fitBounds(points, { paddingBottomRight: [250, 0] })
 
@@ -445,11 +481,15 @@ async function loadMap() {
       lng += (Math.random() - 0.5) * 0.0002
     }
     seen.add(key)
-    const icon = createTagIcon(colorByTag[loc.tag], hueByTag[loc.tag], loc.emoji)
+    const icon = createTagIcon(
+      colorByTag[loc.tag],
+      hueByTag[loc.tag],
+      loc.emoji,
+    )
     const marker = L.marker([lat, lng], { icon })
       .addTo(map)
       .bindPopup(
-        `<b>${escapeHtml(loc.name)}</b><br>${escapeHtml(loc.timestamp)}<br>
+        `<b>${escapeHtml(loc.name)}</b><br>${escapeHtml(localTime(loc.timestamp))}<br>
          <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank">
            View on Google Maps
          </a>`,
@@ -505,20 +545,26 @@ async function loadMap() {
 
   const today = new Date()
   const defaultEnd = isoDate(today)
-  const defaultStart = isoDate(new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000))
+  const defaultStart = isoDate(
+    new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000),
+  )
 
   sidebar.innerHTML = locations
     .map((loc) => {
-      const schedules = (schedulesByTag[loc.tag] || []).slice().sort(
-        (a, b) => a.day - b.day || a.start_time.localeCompare(b.start_time),
-      )
+      const schedules = (schedulesByTag[loc.tag] || [])
+        .slice()
+        .sort(
+          (a, b) => a.day - b.day || a.start_time.localeCompare(b.start_time),
+        )
       const schedulesHtml = schedules.length
-        ? schedules.map((s) => {
-            return `<div class="tag-schedule">
+        ? schedules
+            .map((s) => {
+              return `<div class="tag-schedule">
       <span>${escapeHtml(`${daysOfWeek[s.day]} ${withoutSeconds(s.start_time)} - ${withoutSeconds(s.end_time)}`)}</span>
       <button type="button" class="schedule-pin" data-lock="${s.lock}" title="Show this lock's area">📍</button>
     </div>`
-          }).join('')
+            })
+            .join('')
         : ''
       return `<div class="tag-row" data-tag="${escapeHtml(loc.name)}" data-tag-id="${escapeHtml(loc.tag)}" style="background:${colorByTag[loc.tag]}33;">
         <div class="tag-head">${
@@ -550,8 +596,13 @@ async function loadMap() {
     const status = routePanel.querySelector('.route-status')
 
     row.addEventListener('click', () => {
-      const alreadyOpen = row.querySelector('.tag-schedules').classList.contains('visible')
-      sidebar.querySelectorAll('.tag-schedules').forEach(s => s.classList.remove('visible'))
+      const alreadyOpen = row
+        .querySelector('.tag-schedules')
+        .classList
+        .contains('visible')
+      sidebar
+        .querySelectorAll('.tag-schedules')
+        .forEach(s => s.classList.remove('visible'))
       row.querySelector('.tag-schedules').classList.add('visible')
 
       // Opening a different tag drops the route still on screen, so the line
